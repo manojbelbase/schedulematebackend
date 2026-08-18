@@ -71,7 +71,7 @@ export const swaggerConfig: JsonObject = {
                         description: "User registered successfully",
                         content: {
                             "application/json": {
-                                schema: { $ref: "#/components/schemas/UserResponse" },
+                                schema: { $ref: "#/components/schemas/AuthResponse" },
                             },
                         },
                     },
@@ -112,7 +112,7 @@ export const swaggerConfig: JsonObject = {
                         description: "Login successful",
                         content: {
                             "application/json": {
-                                schema: { $ref: "#/components/schemas/UserResponse" },
+                                schema: { $ref: "#/components/schemas/AuthResponse" },
                             },
                         },
                     },
@@ -314,6 +314,23 @@ export const swaggerConfig: JsonObject = {
                     success: { type: "boolean", example: true },
                     message: { type: "string" },
                     data: { $ref: "#/components/schemas/PublicUser" },
+                },
+            },
+            AuthResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                        type: "object",
+                        required: ["user", "accessToken"],
+                        properties: {
+                            user: { $ref: "#/components/schemas/PublicUser" },
+                            accessToken: { type: "string" },
+                            refreshToken: { type: "string" },
+                        },
+                    },
                 },
             },
         },

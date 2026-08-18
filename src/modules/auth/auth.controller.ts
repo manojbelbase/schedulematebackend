@@ -57,7 +57,11 @@ export async function googleCallbackController(req: Request, res: Response): Pro
         setAccessTokenCookie(res, accessToken);
         setRefreshTokenCookie(res, refreshToken);
 
-        res.redirect(`${env.frontendUrl}${redirectPath}`);
+        const target = new URL(`${env.frontendUrl}/api/auth/google`);
+        target.searchParams.set("token", accessToken);
+        target.searchParams.set("refresh", refreshToken);
+        target.searchParams.set("redirect", redirectPath);
+        res.redirect(target.toString());
     } catch (error) {
         res.redirect(`${env.frontendUrl}/auth/login?error=google_authentication_failed`);
     }
@@ -83,6 +87,8 @@ export async function registerController(req: Request, res: Response): Promise<v
 
     sendSuccess(res, httpStatus.CREATED, "User registered successfully", {
         user: toPublicUser(user),
+        accessToken,
+        refreshToken,
     });
 }
 
@@ -95,6 +101,8 @@ export async function loginController(req: Request, res: Response): Promise<void
 
     sendSuccess(res, httpStatus.OK, "Login successful", {
         user: toPublicUser(user),
+        accessToken,
+        refreshToken,
     });
 }
 
