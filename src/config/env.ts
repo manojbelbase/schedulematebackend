@@ -1,0 +1,34 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+function checkRequiredEnvVariable(key: string): string {
+    const value = process.env[key];
+
+    if (!value) {
+        throw new Error(`Missing required environment variable: ${key}`);
+    }
+    return value;
+}
+
+export const env = {
+    port: Number(process.env.PORT) || 8000,
+    isProduction: (process.env.NODE_ENV ?? 'development') === 'production',
+    nodeEnv: process.env.NODE_ENV ?? 'development',
+    logLevel: process.env.LOG_LEVEL ?? 'info',
+    databaseUrl: checkRequiredEnvVariable('DATABASE_URL'),
+    jwtSecret: checkRequiredEnvVariable('JWT_SECRET'),
+    jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
+    jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
+    accessTokenCookieName: 'scheduledmate-token',
+    refreshCookieName: 'scheduledmate_refresh',
+    docsAuthToken: process.env.DOCS_AUTH_TOKEN ?? '',
+    googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+    googleRedirectUri: process.env.GOOGLE_REDIRECT_URI ?? '',
+    corsOrigins: (process.env.CORS_ORIGINS ?? '')
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    frontendUrl:
+        process.env.FRONTEND_URL ?? ((process.env.CORS_ORIGINS ?? '').split(',')[0]?.trim() ?? ''),
+} as const;
