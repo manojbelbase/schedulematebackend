@@ -236,6 +236,105 @@ export const swaggerConfig: JsonObject = {
                 },
             },
         },
+        "/api/auth/forgot-password": {
+            post: {
+                operationId: "AuthControllerForgotPassword",
+                tags: ["Auth"],
+                summary: "Request a password reset link by email",
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/ForgotPasswordDto" },
+                        },
+                    },
+                },
+                responses: {
+                    "200": {
+                        description: "Reset link sent (always returns OK even if email not found)",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/MessageResponse" },
+                            },
+                        },
+                    },
+                    "400": {
+                        description: "Invalid request body",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/auth/verify-otp": {
+            post: {
+                operationId: "AuthControllerVerifyOtp",
+                tags: ["Auth"],
+                summary: "Verify a password reset OTP code",
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/VerifyOtpDto" },
+                        },
+                    },
+                },
+                responses: {
+                    "200": {
+                        description: "OTP verified successfully",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/MessageResponse" },
+                            },
+                        },
+                    },
+                    "400": {
+                        description: "Invalid request body or OTP",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/auth/reset-password": {
+            post: {
+                operationId: "AuthControllerResetPassword",
+                tags: ["Auth"],
+                summary: "Reset the password using an email and verified OTP",
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/ResetPasswordDto" },
+                        },
+                    },
+                },
+                responses: {
+                    "200": {
+                        description: "Password reset successfully",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/UserResponse" },
+                            },
+                        },
+                    },
+                    "400": {
+                        description: "Invalid request body or OTP",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
     },
     components: {
         securitySchemes: {
@@ -277,6 +376,30 @@ export const swaggerConfig: JsonObject = {
                 properties: {
                     email: { type: "string", format: "email", example: "user@example.com" },
                     password: { type: "string", example: "password123" },
+                },
+            },
+            ForgotPasswordDto: {
+                type: "object",
+                required: ["email"],
+                properties: {
+                    email: { type: "string", format: "email", example: "user@example.com" },
+                },
+            },
+            VerifyOtpDto: {
+                type: "object",
+                required: ["email", "otp"],
+                properties: {
+                    email: { type: "string", format: "email", example: "user@example.com" },
+                    otp: { type: "string", minLength: 6, maxLength: 6, example: "123456" },
+                },
+            },
+            ResetPasswordDto: {
+                type: "object",
+                required: ["email", "otp", "newPassword"],
+                properties: {
+                    email: { type: "string", format: "email", example: "user@example.com" },
+                    otp: { type: "string", minLength: 6, maxLength: 6, example: "123456" },
+                    newPassword: { type: "string", minLength: 8, example: "newPassword123" },
                 },
             },
             PublicUser: {
