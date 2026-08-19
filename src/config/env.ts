@@ -25,6 +25,7 @@ export const env = {
     googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
     googleRedirectUri: process.env.GOOGLE_REDIRECT_URI ?? '',
+    googleConnectRedirectUri: process.env.GOOGLE_CONNECT_REDIRECT_URI ?? '',
     corsOrigins: (process.env.CORS_ORIGINS ?? '')
         .split(',')
         .map((origin) => origin.trim())

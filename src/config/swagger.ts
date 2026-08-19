@@ -34,6 +34,7 @@ export const swaggerConfig: JsonObject = {
     tags: [
         { name: "Health", description: "Server health endpoints" },
         { name: "Auth", description: "Authentication endpoints" },
+        { name: "Google", description: "Google Calendar connection endpoints" },
     ],
     paths: {
         "/api/health": {
@@ -335,6 +336,102 @@ export const swaggerConfig: JsonObject = {
                 },
             },
         },
+        "/api/google/status": {
+            get: {
+                operationId: "GoogleControllerStatus",
+                tags: ["Google"],
+                summary: "Check whether the current user is connected to Google Calendar",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "Google connection status",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    $ref: "#/components/schemas/GoogleStatusResponse",
+                                },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/google/connect": {
+            get: {
+                operationId: "GoogleControllerConnect",
+                tags: ["Google"],
+                summary: "Redirect the current user to Google's consent screen for calendar access",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "redirect",
+                        in: "query",
+                        required: false,
+                        schema: { type: "string", default: "/settings" },
+                        description: "Path to return to after connecting",
+                    },
+                ],
+                responses: {
+                    "302": { description: "Redirect to Google's consent screen" },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/google/connect/callback": {
+            get: {
+                operationId: "GoogleControllerConnectCallback",
+                tags: ["Google"],
+                summary: "Google OAuth callback; stores the calendar tokens and redirects to the frontend",
+                parameters: [
+                    { name: "code", in: "query", required: true, schema: { type: "string" } },
+                    { name: "state", in: "query", required: true, schema: { type: "string" } },
+                ],
+                responses: {
+                    "302": { description: "Redirects to the frontend after connecting" },
+                },
+            },
+        },
+        "/api/google/disconnect": {
+            post: {
+                operationId: "GoogleControllerDisconnect",
+                tags: ["Google"],
+                summary: "Remove the current user's stored Google Calendar account",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "Google Calendar disconnected",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/MessageResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
     },
     components: {
         securitySchemes: {
@@ -454,6 +551,23 @@ export const swaggerConfig: JsonObject = {
                             refreshToken: { type: "string" },
                         },
                     },
+                },
+            },
+            GoogleStatusData: {
+                type: "object",
+                required: ["connected"],
+                properties: {
+                    connected: { type: "boolean", example: true },
+                    googleEmail: { type: "string", format: "email", nullable: true },
+                },
+            },
+            GoogleStatusResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: { $ref: "#/components/schemas/GoogleStatusData" },
                 },
             },
         },
