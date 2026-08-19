@@ -18,7 +18,7 @@ function cookieDefaults() {
 
 export function maxAgeAccessMs(): number {
     const value = env.jwtAccessExpiresIn.match(/(\d+)(m|h|d)/);
-    if (!value) return 15 * 60 * 1000;
+    if (!value) return 7 * 24 * 60 * 60 * 1000;
     const amount = Number(value[1]);
     const unit = value[2];
     if (unit === "m") return amount * 60 * 1000;
@@ -28,7 +28,7 @@ export function maxAgeAccessMs(): number {
 
 export function maxAgeRefreshMs(): number {
     const value = env.jwtRefreshExpiresIn.match(/(\d+)(m|h|d)/);
-    if (!value) return 7 * 24 * 60 * 60 * 1000;
+    if (!value) return 14 * 24 * 60 * 60 * 1000;
     const amount = Number(value[1]);
     const unit = value[2];
     if (unit === "m") return amount * 60 * 1000;
