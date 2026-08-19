@@ -3,7 +3,11 @@ import { OAuth2Client } from "google-auth-library";
 import { AppError } from "../../common/errors/AppError";
 import { httpStatus } from "../../constants/httpStatus";
 import { env } from "../../config/env";
-import { saveGoogleAccount, findByUserId, deleteByUserId } from "./google-account.repository";
+import {
+    saveConnection,
+    findByUserId,
+    updateConnection,
+} from "./calendar-connection.repository";
 
 export type GoogleConnectionStatus = {
     connected: boolean;
@@ -19,11 +23,12 @@ export async function saveGoogleCredentials(
     if (!credentials.access_token) {
         throw new AppError("Google did not return an access token", httpStatus.BAD_REQUEST);
     }
-    await saveGoogleAccount(userId, {
+    await saveConnection(userId, {
         googleEmail,
         accessToken: credentials.access_token,
         refreshToken,
         expiresAt: credentials.expiry_date ? new Date(credentials.expiry_date) : null,
+        connected: true,
     });
 }
 
@@ -32,7 +37,7 @@ export async function getConnectionStatus(userId: string): Promise<GoogleConnect
     if (!account) {
         return { connected: false, googleEmail: null };
     }
-    return { connected: true, googleEmail: account.googleEmail };
+    return { connected: account.connected, googleEmail: account.googleEmail };
 }
 
 export async function getOAuthClientForUser(userId: string): Promise<OAuth2Client> {
@@ -57,7 +62,7 @@ export async function getOAuthClientForUser(userId: string): Promise<OAuth2Clien
         try {
             const { credentials } = await client.refreshAccessToken();
             client.setCredentials(credentials);
-            await saveGoogleAccount(userId, {
+            await saveConnection(userId, {
                 googleEmail: account.googleEmail,
                 accessToken: credentials.access_token ?? account.accessToken,
                 refreshToken: credentials.refresh_token ?? account.refreshToken,
@@ -72,5 +77,5 @@ export async function getOAuthClientForUser(userId: string): Promise<OAuth2Clien
 }
 
 export async function disconnectGoogle(userId: string): Promise<void> {
-    await deleteByUserId(userId);
+    await updateConnection(userId, { connected: false });
 }

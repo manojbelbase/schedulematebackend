@@ -2,8 +2,8 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from "typeorm";
 import { BaseEntity } from "../../common/entities/base.entity";
 import { User } from "../users/user.entity";
 
-@Entity("google_accounts")
-export class GoogleAccount extends BaseEntity {
+@Entity("calendar_connections")
+export class CalendarConnection extends BaseEntity {
     @Column({ name: "user_id", type: "uuid" })
     userId!: string;
 
@@ -23,4 +23,7 @@ export class GoogleAccount extends BaseEntity {
 
     @Column({ name: "expires_at", type: "timestamp", nullable: true })
     expiresAt!: Date | null;
+
+    @Column({ name: "connected", type: "boolean", default: true })
+    connected!: boolean;
 }

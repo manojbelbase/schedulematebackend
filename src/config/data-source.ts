@@ -3,14 +3,14 @@ import { DataSource } from "typeorm";
 import { env } from "./env";
 import { User } from "../modules/users/user.entity";
 import { PasswordReset } from "../modules/password-reset/password-reset.entity";
-import { GoogleAccount } from "../modules/google/google-account.entity";
+import { CalendarConnection } from "../modules/google/calendar-connection.entity";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
     url: env.databaseUrl,
     synchronize: false,
     logging: !env.isProduction,
-    entities: [User, PasswordReset, GoogleAccount],
+    entities: [User, PasswordReset, CalendarConnection],
     migrations: [import.meta.dirname + "/../database/migrations/*.{ts,js}"],
     migrationsTableName: "migrations",
 });
