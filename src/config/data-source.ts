@@ -3,7 +3,7 @@ import { DataSource } from "typeorm";
 import { env } from "./env";
 import { User } from "../modules/users/user.entity";
 import { PasswordReset } from "../modules/password-reset/password-reset.entity";
-import { CalendarConnection } from "../modules/google/calendar-connection.entity";
+import { CalendarConnection } from "../modules/calendar-connection/calendar-connection.entity";
 
 export const AppDataSource = new DataSource({
     type: "postgres",

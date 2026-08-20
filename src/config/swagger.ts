@@ -34,7 +34,7 @@ export const swaggerConfig: JsonObject = {
     tags: [
         { name: "Health", description: "Server health endpoints" },
         { name: "Auth", description: "Authentication endpoints" },
-        { name: "Google", description: "Google Calendar connection endpoints" },
+        { name: "CalendarConnection", description: "Calendar connection endpoints" },
     ],
     paths: {
         "/api/health": {
@@ -336,19 +336,19 @@ export const swaggerConfig: JsonObject = {
                 },
             },
         },
-        "/api/google/status": {
+        "/api/calendar-connection/status": {
             get: {
-                operationId: "GoogleControllerStatus",
-                tags: ["Google"],
-                summary: "Check whether the current user is connected to Google Calendar",
+                operationId: "CalendarConnectionControllerStatus",
+                tags: ["CalendarConnection"],
+                summary: "Check whether the current user is connected to a calendar",
                 security: [{ bearerAuth: [] }],
                 responses: {
                     "200": {
-                        description: "Google connection status",
+                        description: "Calendar connection status",
                         content: {
                             "application/json": {
                                 schema: {
-                                    $ref: "#/components/schemas/GoogleStatusResponse",
+                                    $ref: "#/components/schemas/CalendarConnectionStatusResponse",
                                 },
                             },
                         },
@@ -364,10 +364,10 @@ export const swaggerConfig: JsonObject = {
                 },
             },
         },
-        "/api/google/connect": {
+        "/api/calendar-connection/connect": {
             get: {
-                operationId: "GoogleControllerConnect",
-                tags: ["Google"],
+                operationId: "CalendarConnectionControllerConnect",
+                tags: ["CalendarConnection"],
                 summary: "Redirect the current user to Google's consent screen for calendar access",
                 security: [{ bearerAuth: [] }],
                 parameters: [
@@ -392,10 +392,10 @@ export const swaggerConfig: JsonObject = {
                 },
             },
         },
-        "/api/google/connect/callback": {
+        "/api/calendar-connection/connect/callback": {
             get: {
-                operationId: "GoogleControllerConnectCallback",
-                tags: ["Google"],
+                operationId: "CalendarConnectionControllerConnectCallback",
+                tags: ["CalendarConnection"],
                 summary: "Google OAuth callback; stores the calendar tokens and redirects to the frontend",
                 parameters: [
                     { name: "code", in: "query", required: true, schema: { type: "string" } },
@@ -406,15 +406,15 @@ export const swaggerConfig: JsonObject = {
                 },
             },
         },
-        "/api/google/disconnect": {
+        "/api/calendar-connection/disconnect": {
             post: {
-                operationId: "GoogleControllerDisconnect",
-                tags: ["Google"],
-                summary: "Remove the current user's stored Google Calendar account",
+                operationId: "CalendarConnectionControllerDisconnect",
+                tags: ["CalendarConnection"],
+                summary: "Remove the current user's stored calendar connection",
                 security: [{ bearerAuth: [] }],
                 responses: {
                     "200": {
-                        description: "Google Calendar disconnected",
+                        description: "Calendar connection disconnected",
                         content: {
                             "application/json": {
                                 schema: { $ref: "#/components/schemas/MessageResponse" },
@@ -553,7 +553,7 @@ export const swaggerConfig: JsonObject = {
                     },
                 },
             },
-            GoogleStatusData: {
+            CalendarConnectionStatusData: {
                 type: "object",
                 required: ["connected"],
                 properties: {
@@ -561,13 +561,15 @@ export const swaggerConfig: JsonObject = {
                     googleEmail: { type: "string", format: "email", nullable: true },
                 },
             },
-            GoogleStatusResponse: {
+            CalendarConnectionStatusResponse: {
                 type: "object",
                 required: ["success", "message", "data"],
                 properties: {
                     success: { type: "boolean", example: true },
                     message: { type: "string" },
-                    data: { $ref: "#/components/schemas/GoogleStatusData" },
+                    data: {
+                        $ref: "#/components/schemas/CalendarConnectionStatusData",
+                    },
                 },
             },
         },

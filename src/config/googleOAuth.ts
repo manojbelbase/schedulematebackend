@@ -59,7 +59,7 @@ export async function getGoogleCredentials(
 
     const email = tokens.id_token
         ? (await client.verifyIdToken({ idToken: tokens.id_token, audience: env.googleClientId }))
-              .getPayload()?.email
+            .getPayload()?.email
         : undefined;
 
     return email

@@ -14,7 +14,7 @@ export type GoogleConnectionStatus = {
     googleEmail: string | null;
 };
 
-export async function saveGoogleCredentials(
+export async function saveConnectionCredentials(
     userId: string,
     credentials: Credentials,
     googleEmail: string | null
@@ -76,6 +76,6 @@ export async function getOAuthClientForUser(userId: string): Promise<OAuth2Clien
     return client;
 }
 
-export async function disconnectGoogle(userId: string): Promise<void> {
+export async function disconnectConnection(userId: string): Promise<void> {
     await updateConnection(userId, { connected: false });
 }

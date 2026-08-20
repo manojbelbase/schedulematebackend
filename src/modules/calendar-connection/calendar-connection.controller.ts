@@ -5,7 +5,11 @@ import { AppError } from "../../common/errors/AppError";
 import { httpStatus } from "../../constants/httpStatus";
 import { sendSuccess } from "../../lib/response";
 import { buildGoogleConnectAuthUrl, getGoogleCredentials } from "../../config/googleOAuth";
-import { disconnectGoogle, getConnectionStatus, saveGoogleCredentials } from "./google.service";
+import {
+    disconnectConnection,
+    getConnectionStatus,
+    saveConnectionCredentials,
+} from "./calendar-connection.service";
 
 function safeRedirectPath(value: unknown): string {
     if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
@@ -14,15 +18,15 @@ function safeRedirectPath(value: unknown): string {
     return value;
 }
 
-export async function googleStatusController(req: Request, res: Response): Promise<void> {
+export async function connectionStatusController(req: Request, res: Response): Promise<void> {
     if (!req.user) {
         throw new AppError("Not authenticated", httpStatus.UNAUTHORIZED);
     }
     const status = await getConnectionStatus(req.user.userId);
-    sendSuccess(res, httpStatus.OK, "Google Calendar connection status", status);
+    sendSuccess(res, httpStatus.OK, "Calendar connection status", status);
 }
 
-export async function googleConnectController(req: Request, res: Response): Promise<void> {
+export async function connectController(req: Request, res: Response): Promise<void> {
     if (!req.user) {
         throw new AppError("Not authenticated", httpStatus.UNAUTHORIZED);
     }
@@ -34,7 +38,7 @@ export async function googleConnectController(req: Request, res: Response): Prom
     res.redirect(connectUrl);
 }
 
-export async function googleConnectCallbackController(req: Request, res: Response): Promise<void> {
+export async function connectCallbackController(req: Request, res: Response): Promise<void> {
     try {
         const { code, state } = req.query as { code?: string; state?: string };
 
@@ -62,7 +66,7 @@ export async function googleConnectCallbackController(req: Request, res: Respons
         }
 
         const { credentials, email } = await getGoogleCredentials(code, env.googleConnectRedirectUri);
-        await saveGoogleCredentials(userId, credentials, email ?? null);
+        await saveConnectionCredentials(userId, credentials, email ?? null);
 
         res.redirect(`${env.frontendUrl}${redirectPath}?google=connected`);
     } catch {
@@ -70,10 +74,10 @@ export async function googleConnectCallbackController(req: Request, res: Respons
     }
 }
 
-export async function googleDisconnectController(req: Request, res: Response): Promise<void> {
+export async function disconnectController(req: Request, res: Response): Promise<void> {
     if (!req.user) {
         throw new AppError("Not authenticated", httpStatus.UNAUTHORIZED);
     }
-    await disconnectGoogle(req.user.userId);
-    sendSuccess(res, httpStatus.OK, "Google Calendar disconnected");
+    await disconnectConnection(req.user.userId);
+    sendSuccess(res, httpStatus.OK, "Calendar connection disconnected");
 }
