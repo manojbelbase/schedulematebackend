@@ -10,7 +10,7 @@ import {
     renameConversation,
     touchConversation,
 } from "./chat.repository";
-import { streamChatReply } from "./agent.service";
+import { generateChatReply } from "./agent.service";
 
 export type PublicConversation = {
     id: string;
@@ -91,9 +91,8 @@ export async function sendMessageNonStreaming(
     await touchConversation(conversationId);
 
     const history = await listMessagesByConversation(conversationId);
-    const replyText = await streamChatReply(
-        history.map((m) => ({ role: m.role, content: m.content })),
-        async () => { }
+    const replyText = await generateChatReply(
+        history.map((m) => ({ role: m.role, content: m.content }))
     );
 
     const assistantMessage = await addMessage({

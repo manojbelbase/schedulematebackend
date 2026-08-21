@@ -1,56 +1,64 @@
+import { AppError } from "../../common/errors/AppError";
 import { getOpenRouterClient } from "../../config/openrouter";
 import { env } from "../../config/env";
+import { httpStatus } from "../../constants/httpStatus";
+import { logger } from "../../lib/logger";
 import { SYSTEM_PROMPT } from "./system.prompt";
-
-type LlmMessage = {
-    role: "system" | "user" | "assistant";
-    content: string;
-};
 
 export type ChatTurn = {
     role: "user" | "assistant";
     content: string;
 };
 
-export async function streamChatReply(
-    messages: ChatTurn[],
-    onDelta: (text: string) => void | Promise<void>
-): Promise<string> {
+function toAppError(err: unknown): AppError {
+    const status = (err as { status?: number } | null)?.status;
+
+    if (status === httpStatus.TOO_MANY_REQUESTS) {
+        return new AppError(
+            "AI provider rate limit exceeded. Please try again in a moment.",
+            httpStatus.TOO_MANY_REQUESTS
+        );
+    }
+    if (status === 401 || status === 403) {
+        logger.error({ err }, "AI provider rejected the API key");
+        return new AppError(
+            "AI provider is misconfigured. Please try again later.",
+            httpStatus.BAD_GATEWAY
+        );
+    }
+
+    logger.error({ err }, "AI provider request failed");
+    return new AppError(
+        "AI provider is currently unavailable. Please try again later.",
+        httpStatus.BAD_GATEWAY
+    );
+}
+
+export async function generateChatReply(messages: ChatTurn[]): Promise<string> {
     const client = getOpenRouterClient();
-    const llmMessages: LlmMessage[] = [
-        { role: "system", content: SYSTEM_PROMPT },
+    const llmMessages = [
+        { role: "system" as const, content: SYSTEM_PROMPT },
         ...messages.map((m) => ({ role: m.role, content: m.content })),
     ];
 
-    let fullText = "";
+    let completion;
     try {
-        const stream = await client.chat.completions.create({
-            model: env.openrouterModel,
-            messages: llmMessages,
-            stream: true,
-        });
-        for await (const chunk of stream) {
-            const delta = chunk.choices[0]?.delta?.content;
-            if (delta) {
-                fullText += delta;
-                await onDelta(delta);
-            }
-        }
-    } catch {
-        // Some models do not support streaming; fall back to a plain completion.
-    }
-
-    if (!fullText.trim()) {
-        const completion = await client.chat.completions.create({
+        completion = await client.chat.completions.create({
             model: env.openrouterModel,
             messages: llmMessages,
         });
-        const text = completion.choices[0]?.message?.content ?? "";
-        if (text) {
-            fullText = text;
-            await onDelta(text);
-        }
+    } catch (err) {
+        throw toAppError(err);
     }
 
-    return fullText.trim() || "I'm not sure how to respond to that.";
+    const text = completion.choices[0]?.message?.content?.trim();
+    if (!text) {
+        logger.error({ completionId: completion.id }, "AI provider returned an empty response");
+        throw new AppError(
+            "AI returned an empty response. Please try again.",
+            httpStatus.BAD_GATEWAY
+        );
+    }
+
+    return text;
 }
