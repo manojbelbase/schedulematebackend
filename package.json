@@ -40,6 +40,7 @@
     "googleapis": "^176.0.0",
     "jsonwebtoken": "^9.0.3",
     "nodemailer": "^9.0.5",
+    "openai": "^7.5.0",
     "pg": "^8.22.0",
     "pino": "^10.3.1",
     "reflect-metadata": "^0.2.2",

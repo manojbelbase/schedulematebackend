@@ -3,14 +3,14 @@ import { AppError } from "../../common/errors/AppError";
 import { httpStatus } from "../../constants/httpStatus";
 import { env } from "../../config/env";
 import { hashPassword } from "../../common/utils/password";
-import { sendOtpEmail } from "../../common/utils/mailer";
+import { sendOtpEmail } from "../../lib/mailer";
 import { findByEmail, updateUser } from "../users/user.repository";
 import {
     createPasswordReset,
     findPendingResetByUser,
     invalidateActiveOtpsForUser,
     markResetUsed,
-} from "../password-reset/password-reset.repository";
+} from "../passwordReset/passwordReset.repository";
 import type { User } from "../users/user.entity";
 
 function generateOtp(): string {

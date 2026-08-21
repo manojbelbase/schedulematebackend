@@ -1,5 +1,5 @@
 import { AppDataSource } from "../../config/data-source";
-import { PasswordReset } from "./password-reset.entity";
+import { PasswordReset } from "./passwordReset.entity";
 
 const passwordResetRepository = AppDataSource.getRepository(PasswordReset);
 

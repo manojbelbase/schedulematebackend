@@ -9,7 +9,7 @@ import {
     disconnectConnection,
     getConnectionStatus,
     saveConnectionCredentials,
-} from "./calendar-connection.service";
+} from "./calendarConnection.service";
 
 function safeRedirectPath(value: unknown): string {
     if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
@@ -18,7 +18,7 @@ function safeRedirectPath(value: unknown): string {
     return value;
 }
 
-export async function connectionStatusController(req: Request, res: Response): Promise<void> {
+export async function getConnectionStatusController(req: Request, res: Response): Promise<void> {
     if (!req.user) {
         throw new AppError("Not authenticated", httpStatus.UNAUTHORIZED);
     }

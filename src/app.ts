@@ -9,7 +9,8 @@ import { notFound } from "./common/middleware/notFound";
 import { healthRouter } from "./modules/health/health.routes";
 import { authRouter } from "./modules/auth/auth.routes";
 import { docsRouter } from "./modules/docs/docs.routes";
-import { calendarConnectionRouter } from "./modules/calendar-connection/calendar-connection.routes";
+import { calendarConnectionRouter } from "./modules/calendarConnection/calendarConnection.routes";
+import { chatRouter } from "./modules/chat/chat.routes";
 
 export function createApp(): Express {
     const app = express();
@@ -26,6 +27,7 @@ export function createApp(): Express {
     app.use("/api/health", healthRouter);
     app.use("/api/auth", authRouter);
     app.use("/api/calendar-connection", calendarConnectionRouter);
+    app.use("/api/chat", chatRouter);
 
     app.use(notFound);
     app.use(errorHandler);

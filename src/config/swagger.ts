@@ -35,6 +35,7 @@ export const swaggerConfig: JsonObject = {
         { name: "Health", description: "Server health endpoints" },
         { name: "Auth", description: "Authentication endpoints" },
         { name: "CalendarConnection", description: "Calendar connection endpoints" },
+        { name: "Chat", description: "AI chat endpoints" },
     ],
     paths: {
         "/api/health": {
@@ -338,7 +339,7 @@ export const swaggerConfig: JsonObject = {
         },
         "/api/calendar-connection/status": {
             get: {
-                operationId: "CalendarConnectionControllerStatus",
+                operationId: "CalendarConnectionControllerGetConnectionStatus",
                 tags: ["CalendarConnection"],
                 summary: "Check whether the current user is connected to a calendar",
                 security: [{ bearerAuth: [] }],
@@ -423,6 +424,198 @@ export const swaggerConfig: JsonObject = {
                     },
                     "401": {
                         description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/chat/conversations": {
+            get: {
+                operationId: "ChatControllerListConversations",
+                tags: ["Chat"],
+                summary: "List the current user's conversations (sidebar)",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "List of conversations",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    $ref: "#/components/schemas/ChatConversationListResponse",
+                                },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+            post: {
+                operationId: "ChatControllerCreateConversation",
+                tags: ["Chat"],
+                summary: "Create a new conversation",
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/CreateConversationDto" },
+                        },
+                    },
+                },
+                responses: {
+                    "201": {
+                        description: "Conversation created",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ChatConversationResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/chat/conversations/{id}": {
+            delete: {
+                operationId: "ChatControllerDeleteConversation",
+                tags: ["Chat"],
+                summary: "Delete a conversation and its messages",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string", format: "uuid" },
+                    },
+                ],
+                responses: {
+                    "200": {
+                        description: "Conversation deleted",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/MessageResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "404": {
+                        description: "Conversation not found",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/chat/conversations/{id}/messages": {
+            get: {
+                operationId: "ChatControllerListMessages",
+                tags: ["Chat"],
+                summary: "Load the messages for a conversation",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string", format: "uuid" },
+                    },
+                ],
+                responses: {
+                    "200": {
+                        description: "List of messages",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ChatMessageListResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "404": {
+                        description: "Conversation not found",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+            post: {
+                operationId: "ChatControllerSendMessage",
+                tags: ["Chat"],
+                summary: "Send a message and receive a non-streaming reply",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string", format: "uuid" },
+                    },
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/SendMessageDto" },
+                        },
+                    },
+                },
+                responses: {
+                    "200": {
+                        description: "User and assistant messages",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ChatSendMessageResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "404": {
+                        description: "Conversation not found",
                         content: {
                             "application/json": {
                                 schema: { $ref: "#/components/schemas/ErrorResponse" },
@@ -569,6 +762,102 @@ export const swaggerConfig: JsonObject = {
                     message: { type: "string" },
                     data: {
                         $ref: "#/components/schemas/CalendarConnectionStatusData",
+                    },
+                },
+            },
+            CreateConversationDto: {
+                type: "object",
+                properties: {
+                    title: { type: "string", maxLength: 255 },
+                },
+            },
+            SendMessageDto: {
+                type: "object",
+                required: ["content"],
+                properties: {
+                    conversationId: { type: "string", format: "uuid", nullable: true },
+                    content: { type: "string", minLength: 1, maxLength: 10000 },
+                },
+            },
+            ChatMessage: {
+                type: "object",
+                required: ["id", "role", "content", "createdAt"],
+                properties: {
+                    id: { type: "string", format: "uuid" },
+                    role: { type: "string", enum: ["user", "assistant"] },
+                    content: { type: "string" },
+                    createdAt: { type: "string", format: "date-time" },
+                },
+            },
+            ChatConversation: {
+                type: "object",
+                required: ["id", "title", "createdAt", "updatedAt"],
+                properties: {
+                    id: { type: "string", format: "uuid" },
+                    title: { type: "string" },
+                    createdAt: { type: "string", format: "date-time" },
+                    updatedAt: { type: "string", format: "date-time" },
+                },
+            },
+            ChatConversationResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                        type: "object",
+                        required: ["id", "title", "createdAt", "updatedAt", "messages"],
+                        properties: {
+                            id: { type: "string", format: "uuid" },
+                            title: { type: "string" },
+                            createdAt: { type: "string", format: "date-time" },
+                            updatedAt: { type: "string", format: "date-time" },
+                            messages: {
+                                type: "array",
+                                items: { $ref: "#/components/schemas/ChatMessage" },
+                            },
+                        },
+                    },
+                },
+            },
+            ChatConversationListResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/ChatConversation" },
+                    },
+                },
+            },
+            ChatMessageListResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/ChatMessage" },
+                    },
+                },
+            },
+            ChatSendMessageResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                        type: "object",
+                        required: ["userMessage", "assistantMessage"],
+                        properties: {
+                            userMessage: { $ref: "#/components/schemas/ChatMessage" },
+                            assistantMessage: { $ref: "#/components/schemas/ChatMessage" },
+                        },
                     },
                 },
             },

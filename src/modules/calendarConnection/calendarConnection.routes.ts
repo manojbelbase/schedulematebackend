@@ -4,16 +4,16 @@ import { authenticate } from "../../common/middleware/auth";
 import {
     connectCallbackController,
     connectController,
-    connectionStatusController,
     disconnectController,
-} from "./calendar-connection.controller";
+    getConnectionStatusController,
+} from "./calendarConnection.controller";
 
 export const calendarConnectionRouter: Router = Router();
 
 calendarConnectionRouter.get(
     "/status",
     authenticate(),
-    asyncHandler(connectionStatusController)
+    asyncHandler(getConnectionStatusController)
 );
 calendarConnectionRouter.get("/connect", authenticate(), asyncHandler(connectController));
 calendarConnectionRouter.get(

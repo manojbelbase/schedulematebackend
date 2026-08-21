@@ -1,5 +1,5 @@
 import { AppDataSource } from "../../config/data-source";
-import { CalendarConnection } from "./calendar-connection.entity";
+import { CalendarConnection } from "./calendarConnection.entity";
 
 const calendarConnectionRepository = AppDataSource.getRepository(CalendarConnection);
 

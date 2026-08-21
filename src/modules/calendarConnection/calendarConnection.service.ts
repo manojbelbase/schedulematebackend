@@ -7,7 +7,7 @@ import {
     saveConnection,
     findByUserId,
     updateConnection,
-} from "./calendar-connection.repository";
+} from "./calendarConnection.repository";
 
 export type GoogleConnectionStatus = {
     connected: boolean;
