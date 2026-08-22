@@ -4,6 +4,7 @@ import { httpStatus } from "../../constants/httpStatus";
 import { sendSuccess } from "../../lib/response";
 import {
     createNewConversation,
+    getConversation,
     getConversationMessages,
     listConversations,
     removeConversation,
@@ -42,6 +43,18 @@ export async function createConversationController(
     const { title } = req.body as CreateConversationDto;
     const conversation = await createNewConversation(req.user.userId, title);
     sendSuccess(res, httpStatus.CREATED, "Conversation created successfully", conversation);
+}
+
+export async function getConversationController(
+    req: Request,
+    res: Response
+): Promise<void> {
+    if (!req.user) {
+        throw new AppError("Not authenticated", httpStatus.UNAUTHORIZED);
+    }
+    const conversationId = requireConversationId(req);
+    const conversation = await getConversation(req.user.userId, conversationId);
+    sendSuccess(res, httpStatus.OK, "Conversation fetched successfully", conversation);
 }
 
 export async function listMessagesController(

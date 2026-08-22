@@ -7,6 +7,7 @@ import { sendMessageSchema } from "./dto/send-message.dto";
 import {
     createConversationController,
     deleteConversationController,
+    getConversationController,
     listConversationsController,
     listMessagesController,
     sendMessageController,
@@ -22,6 +23,7 @@ chatRouter.post(
     validateBody(createConversationSchema),
     asyncHandler(createConversationController)
 );
+chatRouter.get("/conversations/:id", asyncHandler(getConversationController));
 chatRouter.get("/conversations/:id/messages", asyncHandler(listMessagesController));
 chatRouter.delete("/conversations/:id", asyncHandler(deleteConversationController));
 chatRouter.post(

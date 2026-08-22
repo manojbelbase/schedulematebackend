@@ -57,6 +57,21 @@ export async function createNewConversation(
     return { ...toPublicConversation(conversation), messages: [] };
 }
 
+export async function getConversation(
+    userId: string,
+    conversationId: string
+): Promise<PublicConversation & { messages: PublicMessage[] }> {
+    const conversation = await findConversationForUser(conversationId, userId);
+    if (!conversation) {
+        throw new AppError("Conversation not found", httpStatus.NOT_FOUND);
+    }
+    const messages = await listMessagesByConversation(conversationId);
+    return {
+        ...toPublicConversation(conversation),
+        messages: messages.map(toPublicMessage),
+    };
+}
+
 export async function getConversationMessages(
     userId: string,
     conversationId: string

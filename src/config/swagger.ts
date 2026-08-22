@@ -494,6 +494,48 @@ export const swaggerConfig: JsonObject = {
             },
         },
         "/api/chat/conversations/{id}": {
+            get: {
+                operationId: "ChatControllerGetConversation",
+                tags: ["Chat"],
+                summary: "Get a single conversation with its messages",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string", format: "uuid" },
+                    },
+                ],
+                responses: {
+                    "200": {
+                        description: "Conversation with messages",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    $ref: "#/components/schemas/ChatConversationResponse",
+                                },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "404": {
+                        description: "Conversation not found",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
             delete: {
                 operationId: "ChatControllerDeleteConversation",
                 tags: ["Chat"],

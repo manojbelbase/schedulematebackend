@@ -41,7 +41,7 @@ export const env = {
     otpTtlMinutes: Number(process.env.e) || 10,
     openrouterApiKey: process.env.OPENROUTER_API_KEY ?? '',
     openrouterModel:
-        process.env.OPENROUTER_MODEL ?? 'google/gemma-4-26b-a4b-it:free',
+        process.env.OPENROUTER_MODEL ?? 'openai/gpt-oss-20b:free',
     openrouterBaseUrl:
         process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1',
 } as const;
