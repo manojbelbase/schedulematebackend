@@ -89,7 +89,13 @@ export async function sendMessageController(
         throw new AppError("Not authenticated", httpStatus.UNAUTHORIZED);
     }
     const conversationId = requireConversationId(req);
-    const { content } = req.body as SendMessageDto;
-    const result = await sendMessageNonStreaming(req.user.userId, conversationId, content);
+    const { content, timezone, provider } = req.body as SendMessageDto;
+    const result = await sendMessageNonStreaming(
+        req.user.userId,
+        conversationId,
+        content,
+        timezone,
+        provider
+    );
     sendSuccess(res, httpStatus.OK, "Message sent successfully", result);
 }

@@ -10,7 +10,7 @@ import {
     renameConversation,
     touchConversation,
 } from "./chat.repository";
-import { generateChatReply } from "./agent.service";
+import { runAgentTurn } from "./agent.service";
 
 export type PublicConversation = {
     id: string;
@@ -95,7 +95,9 @@ export async function removeConversation(userId: string, conversationId: string)
 export async function sendMessageNonStreaming(
     userId: string,
     conversationId: string,
-    content: string
+    content: string,
+    timezone?: string,
+    provider?: string
 ): Promise<{ userMessage: PublicMessage; assistantMessage: PublicMessage }> {
     const conversation = await findConversationForUser(conversationId, userId);
     if (!conversation) {
@@ -106,8 +108,10 @@ export async function sendMessageNonStreaming(
     await touchConversation(conversationId);
 
     const history = await listMessagesByConversation(conversationId);
-    const replyText = await generateChatReply(
-        history.map((m) => ({ role: m.role, content: m.content }))
+    const replyText = await runAgentTurn(
+        userId,
+        history.map((m) => ({ role: m.role, content: m.content })),
+        { timezone, provider }
     );
 
     const assistantMessage = await addMessage({

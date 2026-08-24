@@ -819,6 +819,20 @@ export const swaggerConfig: JsonObject = {
                 properties: {
                     conversationId: { type: "string", format: "uuid", nullable: true },
                     content: { type: "string", minLength: 1, maxLength: 10000 },
+                    timezone: {
+                        type: "string",
+                        maxLength: 64,
+                        nullable: true,
+                        description:
+                            "IANA timezone name (e.g. Asia/Kathmandu) for resolving relative dates in chat",
+                    },
+                    provider: {
+                        type: "string",
+                        maxLength: 32,
+                        nullable: true,
+                        description:
+                            "LLM provider to use for this message (e.g. deepseek, openrouter). Defaults to the backend-configured provider.",
+                    },
                 },
             },
             ChatMessage: {

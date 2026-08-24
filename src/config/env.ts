@@ -39,6 +39,11 @@ export const env = {
     smtpFrom: process.env.SMTP_FROM ?? (process.env.SMTP_USER ?? ''),
     smtpSecure: (process.env.SMTP_SECURE ?? 'false') === 'true',
     otpTtlMinutes: Number(process.env.e) || 10,
+    llmDefaultProvider: process.env.LLM_DEFAULT_PROVIDER ?? 'deepseek',
+    deepseekApiKey: process.env.DEEPSEEK_API_KEY ?? '',
+    deepseekModel: process.env.DEEPSEEK_MODEL ?? 'deepseek-chat',
+    deepseekBaseUrl:
+        process.env.DEEPSEEK_BASE_URL ?? 'https://api.deepseek.com',
     openrouterApiKey: process.env.OPENROUTER_API_KEY ?? '',
     openrouterModel:
         process.env.OPENROUTER_MODEL ?? 'openai/gpt-oss-20b:free',
