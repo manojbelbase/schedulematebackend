@@ -1,5 +1,6 @@
 import { AppDataSource } from "../../config/data-source";
-import { User } from "./user.entity";
+import { User, UserRole } from "./user.entity";
+import type { ListQueryOptions } from "../../common/utils/pagination";
 
 const userRepository = AppDataSource.getRepository(User);
 
@@ -33,6 +34,7 @@ export async function createUser(data: {
     username?: string | null;
     passwordHash?: string | null;
     googleId?: string | null;
+    role?: UserRole;
 }): Promise<User> {
     const user = userRepository.create({
         email: data.email,
@@ -40,6 +42,7 @@ export async function createUser(data: {
         username: data.username ?? null,
         password: data.passwordHash ?? null,
         googleId: data.googleId ?? null,
+        role: data.role ?? UserRole.USER,
     });
     return await userRepository.save(user);
 }
@@ -52,6 +55,7 @@ export async function updateUser(
         username?: string | null;
         passwordHash?: string | null;
         googleId?: string | null;
+        role?: UserRole;
     }
 ): Promise<User | null> {
     const user = await userRepository.findOne({ where: { id } });
@@ -73,10 +77,42 @@ export async function updateUser(
     if (data.googleId !== undefined) {
         user.googleId = data.googleId;
     }
+    if (data.role !== undefined) {
+        user.role = data.role;
+    }
     return await userRepository.save(user);
 }
 
 export async function deleteUser(id: string): Promise<boolean> {
     const result = await userRepository.delete({ id });
     return (result.affected ?? 0) > 0;
+}
+
+export async function listUsers(query: ListQueryOptions): Promise<{ items: User[]; total: number }> {
+    const qb = userRepository.createQueryBuilder("user");
+
+    if (query.query) {
+        qb.andWhere(
+            "(user.email ILIKE :query OR user.name ILIKE :query OR user.username ILIKE :query)",
+            { query: `%${query.query}%` }
+        );
+    }
+
+    if (query.dateFrom) {
+        qb.andWhere("user.createdAt >= :dateFrom", { dateFrom: query.dateFrom });
+    }
+    if (query.dateTo) {
+        qb.andWhere("user.createdAt <= :dateTo", { dateTo: query.dateTo });
+    }
+
+    const total = await qb.getCount();
+
+    const sortBy = query.sortBy ?? "createdAt";
+    const sortOrder = query.sortOrder ?? "DESC";
+    qb.orderBy(`user.${sortBy}`, sortOrder);
+    qb.skip(query.page * query.take).take(query.take);
+
+    const items = await qb.getMany();
+
+    return { items, total };
 }

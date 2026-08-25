@@ -5,12 +5,14 @@ import { env } from "../../config/env";
 import { verifyAccessToken } from "../utils/jwt";
 import { findUserById } from "../../modules/users/user.repository";
 import type { User } from "../../modules/users/user.entity";
+import { UserRole } from "../../modules/users/user.entity";
 
 export type AuthContext = {
     authUserId: string;
     email: string;
     name: string;
     userId: string;
+    role: UserRole;
     tokenId: Record<string, unknown> | undefined;
 };
 
@@ -20,6 +22,7 @@ function fromAuthContext(user: User): AuthContext {
         email: user.email,
         name: user.name ?? "",
         userId: user.id,
+        role: user.role,
         tokenId: undefined,
     };
 }
@@ -54,5 +57,15 @@ export function authenticate(): RequestHandler {
             }
             next(new AppError("Invalid or expired token", httpStatus.UNAUTHORIZED));
         }
+    };
+}
+
+export function requireAdmin(): RequestHandler {
+    return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
+        if (!req.user || req.user.role !== UserRole.ADMIN) {
+            next(new AppError("Admin access required", httpStatus.FORBIDDEN));
+            return;
+        }
+        next();
     };
 }

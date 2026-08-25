@@ -36,6 +36,7 @@ export const swaggerConfig: JsonObject = {
         { name: "Auth", description: "Authentication endpoints" },
         { name: "CalendarConnection", description: "Calendar connection endpoints" },
         { name: "Chat", description: "AI chat endpoints" },
+        { name: "Backoffice", description: "Backoffice endpoints" },
     ],
     paths: {
         "/api/health": {
@@ -667,6 +668,158 @@ export const swaggerConfig: JsonObject = {
                 },
             },
         },
+        "/api/backoffice/users": {
+            get: {
+                operationId: "BackofficeControllerListUsers",
+                tags: ["Backoffice"],
+                summary: "List all registered users (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "page", in: "query", required: false, schema: { type: "integer", default: 0, minimum: 0 }, description: "Page number (0-indexed)" },
+                    { name: "take", in: "query", required: false, schema: { type: "integer", default: 10, minimum: 1, maximum: 100 }, description: "Items per page" },
+                    { name: "query", in: "query", required: false, schema: { type: "string" }, description: "Search by email, name, or username" },
+                    { name: "dateFrom", in: "query", required: false, schema: { type: "string", format: "date-time" }, description: "Filter by createdAt >= dateFrom" },
+                    { name: "dateTo", in: "query", required: false, schema: { type: "string", format: "date-time" }, description: "Filter by createdAt <= dateTo" },
+                    { name: "sortBy", in: "query", required: false, schema: { type: "string", default: "createdAt" }, description: "Sort field" },
+                    { name: "sortOrder", in: "query", required: false, schema: { type: "string", enum: ["ASC", "DESC"], default: "DESC" }, description: "Sort order" },
+                ],
+                responses: {
+                    "200": {
+                        description: "Paginated list of users",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/BackofficeUserListResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/backoffice/auth/login": {
+            post: {
+                operationId: "BackofficeAuthControllerLogin",
+                tags: ["Backoffice"],
+                summary: "Sign in to backoffice with email and password (admin only)",
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/LoginUserDto" },
+                        },
+                    },
+                },
+                responses: {
+                    "200": {
+                        description: "Backoffice login successful",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/BackofficeAuthResponse" },
+                            },
+                        },
+                    },
+                    "400": {
+                        description: "Invalid request body",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Invalid email or password",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access denied (not an admin)",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/backoffice/auth/me": {
+            get: {
+                operationId: "BackofficeAuthControllerMe",
+                tags: ["Backoffice"],
+                summary: "Get the currently authenticated backoffice user",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "Current backoffice user",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/BackofficeUserResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/backoffice/auth/logout": {
+            post: {
+                operationId: "BackofficeAuthControllerLogout",
+                tags: ["Backoffice"],
+                summary: "Clear the auth cookies",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "Logged out",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/MessageResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
     },
     components: {
         securitySchemes: {
@@ -733,16 +886,6 @@ export const swaggerConfig: JsonObject = {
                     otp: { type: "string", minLength: 6, maxLength: 6, example: "123456" },
                     newPassword: { type: "string", minLength: 8, example: "newPassword123" },
                 },
-            },
-            PublicUser: {
-                type: "object",
-                properties: {
-                    id: { type: "string", format: "uuid" },
-                    name: { type: "string", nullable: true },
-                    email: { type: "string", format: "email" },
-                    username: { type: "string", nullable: true },
-                },
-                required: ["id", "email"],
             },
             HealthData: {
                 type: "object",
@@ -915,6 +1058,66 @@ export const swaggerConfig: JsonObject = {
                             assistantMessage: { $ref: "#/components/schemas/ChatMessage" },
                         },
                     },
+                },
+            },
+            PublicUser: {
+                type: "object",
+                required: ["id", "email"],
+                properties: {
+                    id: { type: "string", format: "uuid" },
+                    email: { type: "string", format: "email" },
+                    name: { type: "string", nullable: true },
+                    username: { type: "string", nullable: true },
+                    role: { type: "string", enum: ["user", "admin"] },
+                    createdAt: { type: "string", format: "date-time" },
+                },
+            },
+            BackofficeUserListResponse: {
+                type: "object",
+                required: ["success", "message", "data", "pagination"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/PublicUser" },
+                    },
+                    pagination: {
+                        type: "object",
+                        required: ["previousPage", "nextPage", "total", "count"],
+                        properties: {
+                            previousPage: { type: "integer", nullable: true },
+                            nextPage: { type: "integer", nullable: true },
+                            total: { type: "integer" },
+                            count: { type: "integer" },
+                        },
+                    },
+                },
+            },
+            BackofficeAuthResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                        type: "object",
+                        required: ["user", "accessToken"],
+                        properties: {
+                            user: { $ref: "#/components/schemas/PublicUser" },
+                            accessToken: { type: "string" },
+                            refreshToken: { type: "string" },
+                        },
+                    },
+                },
+            },
+            BackofficeUserResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: { $ref: "#/components/schemas/PublicUser" },
                 },
             },
         },

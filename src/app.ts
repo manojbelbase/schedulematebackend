@@ -11,6 +11,8 @@ import { authRouter } from "./modules/auth/auth.routes";
 import { docsRouter } from "./modules/docs/docs.routes";
 import { calendarConnectionRouter } from "./modules/calendarConnection/calendarConnection.routes";
 import { chatRouter } from "./modules/chat/chat.routes";
+import { backofficeRouter } from "./modules/backoffice/backoffice.routes";
+import { backofficeAuthRouter } from "./modules/backoffice/backoffice.auth.routes";
 
 export function createApp(): Express {
     const app = express();
@@ -28,6 +30,8 @@ export function createApp(): Express {
     app.use("/api/auth", authRouter);
     app.use("/api/calendar-connection", calendarConnectionRouter);
     app.use("/api/chat", chatRouter);
+    app.use("/api/backoffice/auth", backofficeAuthRouter);
+    app.use("/api/backoffice", backofficeRouter);
 
     app.use(notFound);
     app.use(errorHandler);

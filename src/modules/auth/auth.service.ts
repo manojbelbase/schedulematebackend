@@ -114,7 +114,7 @@ export async function loginWithEmail(
 ): Promise<{ accessToken: string; refreshToken: string; user: User }> {
     const user = await findByEmail(email);
     if (!user || !user.password || !verifyPassword(password, user.password)) {
-        throw new AppError("Invalid email or password", httpStatus.UNAUTHORIZED);
+        throw new AppError("Invalid email or password", httpStatus.BAD_REQUEST);
     }
 
     const tokenPayload = { sub: user.id, email: user.email };

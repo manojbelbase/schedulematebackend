@@ -1,6 +1,11 @@
 import { Column, Entity } from "typeorm";
 import { BaseEntity } from "../../common/entities/base.entity";
 
+export enum UserRole {
+    USER = "user",
+    ADMIN = "admin",
+}
+
 @Entity("users")
 export class User extends BaseEntity {
     @Column({ type: "varchar", length: 255, unique: true })
@@ -17,6 +22,9 @@ export class User extends BaseEntity {
 
     @Column({ name: "google_id", type: "varchar", length: 255, unique: true, nullable: true })
     googleId!: string | null;
+
+    @Column({ type: "varchar", length: 20, default: UserRole.USER })
+    role!: UserRole;
 
     toJSON() {
         const { password, googleId, ...safe } = this;
