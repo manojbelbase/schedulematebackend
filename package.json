@@ -12,7 +12,9 @@
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "db:migrate": "tsx src/config/run-migration.ts",
-    "db:revert": "tsx src/config/revert-migration.ts"
+    "db:revert": "tsx src/config/revert-migration.ts",
+    "db:seed:backoffice": "tsx src/scripts/seed-backoffice-prod.ts",
+    "db:seed:admin": "tsx src/scripts/create-admin.ts"
   },
   "keywords": [],
   "author": "",

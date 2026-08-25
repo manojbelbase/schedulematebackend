@@ -38,7 +38,7 @@ export const env = {
     smtpPass: process.env.SMTP_PASS ?? '',
     smtpFrom: process.env.SMTP_FROM ?? (process.env.SMTP_USER ?? ''),
     smtpSecure: (process.env.SMTP_SECURE ?? 'false') === 'true',
-    otpTtlMinutes: Number(process.env.e) || 10,
+    otpTtlMinutes: Number(process.env.OTP_TTL_MINUTES) || 10,
     llmDefaultProvider: process.env.LLM_DEFAULT_PROVIDER ?? 'deepseek',
     deepseekApiKey: process.env.DEEPSEEK_API_KEY ?? '',
     deepseekModel: process.env.DEEPSEEK_MODEL ?? 'deepseek-chat',
@@ -49,4 +49,7 @@ export const env = {
         process.env.OPENROUTER_MODEL ?? 'openai/gpt-oss-20b:free',
     openrouterBaseUrl:
         process.env.OPENROUTER_BASE_URL ?? 'https://openrouter.ai/api/v1',
+    backofficeEmail: process.env.BACKOFFICE_EMAIL ?? '',
+    backofficePassword: process.env.BACKOFFICE_PASSWORD ?? '',
+    backofficeName: process.env.BACKOFFICE_NAME ?? 'Backoffice Admin',
 } as const;
