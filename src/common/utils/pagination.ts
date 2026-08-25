@@ -8,6 +8,14 @@ export interface ListQueryOptions {
     dateTo?: Date;
 }
 
+export interface ParseListQueryOptions {
+    defaultSortBy?: string;
+    defaultSortOrder?: "ASC" | "DESC";
+    defaultPage?: number;
+    defaultTake?: number;
+    maxTake?: number;
+}
+
 export interface Pagination {
     previousPage: number | null;
     nextPage: number | null;
@@ -57,14 +65,31 @@ export const paginationQueryParams = [
     },
 ];
 
-export function parseListQuery(query: Record<string, unknown>): ListQueryOptions {
-    const page = parseNonNegativeInt(query.page, DEFAULT_PAGE);
-    const take = Math.min(parsePositiveInt(query.take, DEFAULT_TAKE), MAX_TAKE);
-    const sortBy = typeof query.sortBy === "string" ? query.sortBy : "createdAt";
-    const sortOrder = query.sortOrder === "asc" ? "ASC" : "DESC";
+export function parseListQuery(query: Record<string, unknown>, options: ParseListQueryOptions = {}): ListQueryOptions {
+    const {
+        defaultSortBy = "createdAt",
+        defaultSortOrder = "DESC",
+        defaultPage = DEFAULT_PAGE,
+        defaultTake = DEFAULT_TAKE,
+        maxTake = MAX_TAKE,
+    } = options;
+
+    const page = parseNonNegativeInt(query.page, defaultPage);
+    const take = Math.min(parsePositiveInt(query.take, defaultTake), maxTake);
+
+    let sortBy = defaultSortBy;
+    if (typeof query.sortBy === "string" && query.sortBy !== "undefined") {
+        sortBy = query.sortBy;
+    }
+
+    let sortOrder = defaultSortOrder;
+    if (typeof query.sortOrder === "string" && query.sortOrder !== "undefined") {
+        sortOrder = query.sortOrder === "asc" ? "ASC" : "DESC";
+    }
+
     const parsed: ListQueryOptions = { page, take, sortBy, sortOrder };
 
-    const q = typeof query.query === "string" ? query.query : undefined;
+    const q = typeof query.query === "string" && query.query !== "undefined" ? query.query : undefined;
     if (q !== undefined) {
         parsed.query = q;
     }

@@ -107,9 +107,7 @@ export async function listUsers(query: ListQueryOptions): Promise<{ items: User[
 
     const total = await qb.getCount();
 
-    const sortBy = query.sortBy ?? "createdAt";
-    const sortOrder = query.sortOrder ?? "DESC";
-    qb.orderBy(`user.${sortBy}`, sortOrder);
+    qb.orderBy(`user.${query.sortBy}`, query.sortOrder);
     qb.skip(query.page * query.take).take(query.take);
 
     const items = await qb.getMany();
