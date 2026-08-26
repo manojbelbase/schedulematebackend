@@ -711,6 +711,112 @@ export const swaggerConfig: JsonObject = {
                     },
                 },
             },
+            post: {
+                operationId: "BackofficeControllerAddUser",
+                tags: ["Backoffice"],
+                summary: "Add a new user by email (admin only). The user can then set their password via the forgot-password flow.",
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/AddUserDto" },
+                        },
+                    },
+                },
+                responses: {
+                    "201": {
+                        description: "User created successfully",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/BackofficeAddUserResponse" },
+                            },
+                        },
+                    },
+                    "400": {
+                        description: "Invalid request body",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "409": {
+                        description: "Email already exists",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/backoffice/users/{id}": {
+            delete: {
+                operationId: "BackofficeControllerDeleteUser",
+                tags: ["Backoffice"],
+                summary: "Delete a user by ID (admin only)",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string", format: "uuid" },
+                    },
+                ],
+                responses: {
+                    "200": {
+                        description: "User deleted successfully",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/MessageResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "404": {
+                        description: "User not found",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
         },
         "/api/backoffice/auth/login": {
             post: {
@@ -1113,6 +1219,23 @@ export const swaggerConfig: JsonObject = {
                 },
             },
             BackofficeUserResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: { $ref: "#/components/schemas/PublicUser" },
+                },
+            },
+            AddUserDto: {
+                type: "object",
+                required: ["email"],
+                properties: {
+                    email: { type: "string", format: "email", example: "newuser@example.com" },
+                    name: { type: "string", maxLength: 100, example: "Jane Doe" },
+                },
+            },
+            BackofficeAddUserResponse: {
                 type: "object",
                 required: ["success", "message", "data"],
                 properties: {
