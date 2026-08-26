@@ -88,7 +88,7 @@ export async function deleteUser(id: string): Promise<boolean> {
     return (result.affected ?? 0) > 0;
 }
 
-export async function listUsers(query: ListQueryOptions): Promise<{ items: User[]; total: number }> {
+export async function listUsers(query: ListQueryOptions, role?: UserRole): Promise<{ items: User[]; total: number }> {
     const qb = userRepository.createQueryBuilder("user");
 
     if (query.query) {
@@ -103,6 +103,10 @@ export async function listUsers(query: ListQueryOptions): Promise<{ items: User[
     }
     if (query.dateTo) {
         qb.andWhere("user.createdAt <= :dateTo", { dateTo: query.dateTo });
+    }
+
+    if (role) {
+        qb.andWhere("user.role = :role", { role });
     }
 
     const total = await qb.getCount();

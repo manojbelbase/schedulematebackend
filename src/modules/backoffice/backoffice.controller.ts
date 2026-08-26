@@ -3,10 +3,20 @@ import { httpStatus } from "../../constants/httpStatus";
 import { sendSuccess } from "../../lib/response";
 import { parseListQuery } from "../../common/utils/pagination";
 import { listUsersService } from "./backoffice.service";
+import { UserRole } from "../users/user.entity";
 
 export async function listUsersController(req: Request, res: Response) {
     const query = parseListQuery(req.query);
-    const result = await listUsersService(query);
+
+    let role: UserRole | undefined;
+    if (typeof req.query.role === "string" && req.query.role !== "undefined") {
+        const value = req.query.role as string;
+        if (value === UserRole.USER || value === UserRole.ADMIN) {
+            role = value;
+        }
+    }
+
+    const result = await listUsersService(query, role);
 
     const publicUsers = result.items.map(user => ({
         id: user.id,

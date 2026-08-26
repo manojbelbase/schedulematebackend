@@ -682,6 +682,7 @@ export const swaggerConfig: JsonObject = {
                     { name: "dateTo", in: "query", required: false, schema: { type: "string", format: "date-time" }, description: "Filter by createdAt <= dateTo" },
                     { name: "sortBy", in: "query", required: false, schema: { type: "string", default: "createdAt" }, description: "Sort field" },
                     { name: "sortOrder", in: "query", required: false, schema: { type: "string", enum: ["ASC", "DESC"], default: "DESC" }, description: "Sort order" },
+                    { name: "role", in: "query", required: false, schema: { type: "string", enum: ["user", "admin"] }, description: "Filter by user role" },
                 ],
                 responses: {
                     "200": {
