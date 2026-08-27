@@ -14,4 +14,54 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGINS
+        value: "http://localhost:3000,http://localhost:3001,http://localhost:3002"
+      - key: DOCS_AUTH_TOKEN
+        value: ""
+      - key: FRONTEND_URL
+        value: "http://localhost:3000"
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: "7d"
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: "14d"
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: GOOGLE_CONNECT_REDIRECT_URI
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_SECURE
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: OTP_TTL_MINUTES
+        sync: false
+      - key: LLM_DEFAULT_PROVIDER
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_MODEL
+        sync: false
+      - key: DEEPSEEK_BASE_URL
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        sync: false
+      - key: OPENROUTER_BASE_URL
+        sync: false
+      - key: BACKOFFICE_EMAIL
+        sync: false
+      - key: BACKOFFICE_PASSWORD
+        sync: false
+      - key: BACKOFFICE_NAME
         sync: false
