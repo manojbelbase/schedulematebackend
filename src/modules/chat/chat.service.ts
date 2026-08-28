@@ -11,6 +11,7 @@ import {
     touchConversation,
 } from "./chat.repository";
 import { runAgentTurn } from "./agent.service";
+import { findUserById, incrementRequestCount } from "../users/user.repository";
 
 export type PublicConversation = {
     id: string;
@@ -98,10 +99,22 @@ export async function sendMessageNonStreaming(
     content: string,
     timezone?: string,
     provider?: string
-): Promise<{ userMessage: PublicMessage; assistantMessage: PublicMessage }> {
+): Promise<{ userMessage: PublicMessage; assistantMessage: PublicMessage; requestsRemaining: number }> {
     const conversation = await findConversationForUser(conversationId, userId);
     if (!conversation) {
         throw new AppError("Conversation not found", httpStatus.NOT_FOUND);
+    }
+
+    const user = await findUserById(userId);
+    if (!user) {
+        throw new AppError("User not found", httpStatus.NOT_FOUND);
+    }
+
+    if (user.apiRequestsUsed >= user.apiRequestLimit) {
+        throw new AppError(
+            "Request limit exceeded. Please upgrade your plan or contact admin.",
+            httpStatus.TOO_MANY_REQUESTS
+        );
     }
 
     const userMessage = await addMessage({ conversationId, role: "user", content });
@@ -114,6 +127,8 @@ export async function sendMessageNonStreaming(
         { timezone, provider }
     );
 
+    await incrementRequestCount(userId);
+
     const assistantMessage = await addMessage({
         conversationId,
         role: "assistant",
@@ -125,8 +140,11 @@ export async function sendMessageNonStreaming(
         await renameConversation(conversationId, content.slice(0, 40));
     }
 
+    const requestsRemaining = user.apiRequestLimit - (user.apiRequestsUsed + 1);
+
     return {
         userMessage: toPublicMessage(userMessage),
         assistantMessage: toPublicMessage(assistantMessage),
+        requestsRemaining,
     };
 }

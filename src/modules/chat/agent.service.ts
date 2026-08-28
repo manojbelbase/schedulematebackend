@@ -75,8 +75,8 @@ export async function runAgentTurn(
     history: ChatTurn[],
     options: AgentTurnOptions = {}
 ): Promise<string> {
-    const provider = resolveLlmProvider(options.provider);
-    const client = getLlmClient(provider);
+    const provider = await resolveLlmProvider(options.provider);
+    const client = await getLlmClient(provider);
     const connection = await getConnectionStatus(userId);
     const messages: ChatCompletionMessageParam[] = [
         {
@@ -96,7 +96,7 @@ export async function runAgentTurn(
         let completion;
         try {
             completion = await client.chat.completions.create({
-                model: getModelForProvider(provider),
+                model: await getModelForProvider(provider),
                 messages,
                 tools: calendarTools,
                 tool_choice: "auto",

@@ -927,6 +927,234 @@ export const swaggerConfig: JsonObject = {
                 },
             },
         },
+        "/api/backoffice/llm-config": {
+            get: {
+                operationId: "LlmConfigControllerListConfigs",
+                tags: ["Backoffice"],
+                summary: "List LLM configurations (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "LLM config fetched successfully",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/LlmConfigListResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+            post: {
+                operationId: "LlmConfigControllerCreateConfig",
+                tags: ["Backoffice"],
+                summary: "Create an LLM configuration (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/CreateLlmConfigDto" },
+                        },
+                    },
+                },
+                responses: {
+                    "200": {
+                        description: "LLM config created successfully",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/LlmConfigResponse" },
+                            },
+                        },
+                    },
+                    "400": {
+                        description: "Invalid request body",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/backoffice/llm-config/providers": {
+            get: {
+                operationId: "LlmConfigControllerListProviders",
+                tags: ["Backoffice"],
+                summary: "List supported LLM providers for the dropdown (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "Supported LLM providers",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/LlmProviderListResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/backoffice/llm-config/active": {
+            get: {
+                operationId: "LlmConfigControllerGetActiveConfig",
+                tags: ["Backoffice"],
+                summary: "Get the active LLM configuration (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "Active LLM config fetched successfully",
+                        content: { "application/json": { schema: { $ref: "#/components/schemas/LlmConfigResponse" } } },
+                    },
+                },
+            },
+        },
+        "/api/backoffice/llm-config/{id}": {
+            patch: {
+                operationId: "LlmConfigControllerUpdateConfig",
+                tags: ["Backoffice"],
+                summary: "Update an LLM configuration (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+                requestBody: {
+                    required: true,
+                    content: { "application/json": { schema: { $ref: "#/components/schemas/UpdateLlmConfigDto" } } },
+                },
+                responses: {
+                    "200": {
+                        description: "LLM config updated successfully",
+                        content: { "application/json": { schema: { $ref: "#/components/schemas/LlmConfigResponse" } } },
+                    },
+                    "400": { description: "Invalid request body", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                    "404": { description: "LLM config not found", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                },
+            },
+            delete: {
+                operationId: "LlmConfigControllerDeleteConfig",
+                tags: ["Backoffice"],
+                summary: "Delete an LLM configuration (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+                responses: {
+                    "200": { description: "LLM config deleted successfully", content: { "application/json": { schema: { $ref: "#/components/schemas/MessageResponse" } } } },
+                    "404": { description: "LLM config not found", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                },
+            },
+        },
+        "/api/backoffice/users/{id}/limit": {
+            patch: {
+                operationId: "BackofficeControllerUpdateUserLimit",
+                tags: ["Backoffice"],
+                summary: "Update a user's API request limit (admin only)",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string", format: "uuid" },
+                    },
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/UpdateUserLimitDto" },
+                        },
+                    },
+                },
+                responses: {
+                    "200": {
+                        description: "User limit updated successfully",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/UserLimitResponse" },
+                            },
+                        },
+                    },
+                    "400": {
+                        description: "Invalid request body",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "404": {
+                        description: "User not found",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
     },
     components: {
         securitySchemes: {
@@ -1159,10 +1387,11 @@ export const swaggerConfig: JsonObject = {
                     message: { type: "string" },
                     data: {
                         type: "object",
-                        required: ["userMessage", "assistantMessage"],
+                        required: ["userMessage", "assistantMessage", "requestsRemaining"],
                         properties: {
                             userMessage: { $ref: "#/components/schemas/ChatMessage" },
                             assistantMessage: { $ref: "#/components/schemas/ChatMessage" },
+                            requestsRemaining: { type: "integer", example: 7 },
                         },
                     },
                 },
@@ -1176,6 +1405,8 @@ export const swaggerConfig: JsonObject = {
                     name: { type: "string", nullable: true },
                     username: { type: "string", nullable: true },
                     role: { type: "string", enum: ["user", "admin"] },
+                    apiRequestLimit: { type: "integer", example: 10 },
+                    apiRequestsUsed: { type: "integer", example: 3 },
                     createdAt: { type: "string", format: "date-time" },
                 },
             },
@@ -1242,6 +1473,109 @@ export const swaggerConfig: JsonObject = {
                     success: { type: "boolean", example: true },
                     message: { type: "string" },
                     data: { $ref: "#/components/schemas/PublicUser" },
+                },
+            },
+            LlmConfigData: {
+                type: "object",
+                required: ["id", "name", "isActive", "activeProvider", "apiKey", "model", "baseUrl"],
+                properties: {
+                    id: { type: "string", format: "uuid" },
+                    name: { type: "string", example: "Production" },
+                    isActive: { type: "boolean", example: true },
+                    activeProvider: { type: "string", example: "deepseek" },
+                    apiKey: { type: "string", example: "sk-..." },
+                    model: { type: "string", example: "deepseek-chat" },
+                    baseUrl: { type: "string", example: "https://api.deepseek.com" },
+                },
+            },
+            LlmConfigResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: { $ref: "#/components/schemas/LlmConfigData" },
+                },
+            },
+            LlmConfigListResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: { type: "array", items: { $ref: "#/components/schemas/LlmConfigData" } },
+                },
+            },
+            LlmProvider: {
+                type: "object",
+                required: ["key", "label", "baseUrl", "defaultModel", "models"],
+                properties: {
+                    key: { type: "string", example: "deepseek" },
+                    label: { type: "string", example: "DeepSeek" },
+                    baseUrl: { type: "string", example: "https://api.deepseek.com" },
+                    defaultModel: { type: "string", example: "deepseek-chat" },
+                    models: {
+                        type: "array",
+                        items: { type: "string" },
+                        example: ["deepseek-chat", "deepseek-reasoner"],
+                    },
+                    requiresReferer: { type: "boolean", example: false },
+                },
+            },
+            LlmProviderListResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: { type: "array", items: { $ref: "#/components/schemas/LlmProvider" } },
+                },
+            },
+            CreateLlmConfigDto: {
+                type: "object",
+                required: ["name", "apiKey"],
+                properties: {
+                    name: { type: "string", minLength: 1, maxLength: 100 },
+                    isActive: { type: "boolean" },
+                    activeProvider: { type: "string", minLength: 1, maxLength: 100 },
+                    apiKey: { type: "string", minLength: 1, maxLength: 500 },
+                    model: { type: "string", maxLength: 200 },
+                },
+            },
+            UpdateLlmConfigDto: {
+                type: "object",
+                properties: {
+                    name: { type: "string", minLength: 1, maxLength: 100 },
+                    isActive: { type: "boolean" },
+                    activeProvider: { type: "string", minLength: 1, maxLength: 100 },
+                    apiKey: { type: "string", maxLength: 500 },
+                    model: { type: "string", maxLength: 200 },
+                    baseUrl: { type: "string", format: "uri", maxLength: 500 },
+                },
+            },
+            UpdateUserLimitDto: {
+                type: "object",
+                properties: {
+                    apiRequestLimit: { type: "integer", minimum: 0, maximum: 100000, example: 10 },
+                    resetUsed: { type: "boolean", example: false },
+                },
+            },
+            UserLimitResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                        type: "object",
+                        required: ["id", "email", "apiRequestLimit", "apiRequestsUsed"],
+                        properties: {
+                            id: { type: "string", format: "uuid" },
+                            email: { type: "string", format: "email" },
+                            apiRequestLimit: { type: "integer", example: 10 },
+                            apiRequestsUsed: { type: "integer", example: 3 },
+                        },
+                    },
                 },
             },
         },

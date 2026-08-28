@@ -17,12 +17,16 @@ export function toPublicUser(user: User): {
     name: string | null;
     email: string;
     username: string | null;
+    apiRequestLimit: number;
+    apiRequestsUsed: number;
 } {
     return {
         id: user.id,
         name: user.name,
         email: user.email,
         username: user.username,
+        apiRequestLimit: user.apiRequestLimit,
+        apiRequestsUsed: user.apiRequestsUsed,
     };
 }
 

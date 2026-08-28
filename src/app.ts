@@ -13,6 +13,7 @@ import { calendarConnectionRouter } from "./modules/calendarConnection/calendarC
 import { chatRouter } from "./modules/chat/chat.routes";
 import { backofficeRouter } from "./modules/backoffice/backoffice.routes";
 import { backofficeAuthRouter } from "./modules/backoffice/backoffice.auth.routes";
+import { llmConfigRouter } from "./modules/llmConfig/llmConfig.routes";
 
 export function createApp(): Express {
     const app = express();
@@ -31,6 +32,7 @@ export function createApp(): Express {
     app.use("/api/calendar-connection", calendarConnectionRouter);
     app.use("/api/chat", chatRouter);
     app.use("/api/backoffice/auth", backofficeAuthRouter);
+    app.use("/api/backoffice/llm-config", llmConfigRouter);
     app.use("/api/backoffice", backofficeRouter);
 
     app.use(notFound);

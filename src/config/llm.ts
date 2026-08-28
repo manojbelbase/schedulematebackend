@@ -2,9 +2,11 @@ import OpenAI from "openai";
 import { env } from "./env";
 import { AppError } from "../common/errors/AppError";
 import { httpStatus } from "../constants/httpStatus";
+import { findActiveConfig } from "../modules/llmConfig/llmConfig.repository";
+import type { LlmConfig } from "../modules/llmConfig/llmConfig.entity";
+import { getProviderRegistryEntry } from "./llmProviders";
 
-const LLM_PROVIDERS = ["deepseek", "openrouter"] as const;
-type LlmProvider = (typeof LLM_PROVIDERS)[number];
+export type LlmProvider = string;
 
 type ProviderConfig = {
     apiKey: string;
@@ -13,66 +15,63 @@ type ProviderConfig = {
     defaultHeaders?: Record<string, string>;
 };
 
-const providerConfigs: Record<LlmProvider, ProviderConfig> = {
-    deepseek: {
-        apiKey: env.deepseekApiKey,
-        model: env.deepseekModel,
-        baseUrl: env.deepseekBaseUrl,
-        defaultHeaders: {},
-    },
-    openrouter: {
-        apiKey: env.openrouterApiKey,
-        model: env.openrouterModel,
-        baseUrl: env.openrouterBaseUrl,
-        defaultHeaders: {
+function buildDefaultHeaders(provider: LlmProvider): Record<string, string> {
+    const entry = getProviderRegistryEntry(provider);
+    if (entry?.requiresReferer) {
+        return {
             "HTTP-Referer": env.frontendUrl,
             "X-Title": "ScheduledMate",
-        },
-    },
-};
-
-function getDefaultLlmProvider(): LlmProvider {
-    const value = env.llmDefaultProvider as LlmProvider;
-    return providerConfigs[value] ? value : "deepseek";
-}
-
-function isSupportedProvider(value: string): value is LlmProvider {
-    return value in providerConfigs;
-}
-
-export function resolveLlmProvider(provider?: string): LlmProvider {
-    if (!provider) {
-        return getDefaultLlmProvider();
+        };
     }
-    if (!isSupportedProvider(provider)) {
+    return {};
+}
+
+async function getConfigForProvider(provider: LlmProvider): Promise<LlmConfig | null> {
+    const active = await findActiveConfig();
+    return active?.activeProvider === provider ? active : null;
+}
+
+export async function resolveLlmProvider(provider?: string): Promise<LlmProvider> {
+    if (provider) return provider;
+    const active = await findActiveConfig();
+    return active?.activeProvider || "deepseek";
+}
+
+const clients: Record<string, OpenAI> = {};
+
+export function invalidateLlmClients(): void {
+    for (const key of Object.keys(clients)) {
+        delete clients[key];
+    }
+}
+
+export async function getLlmClient(provider: LlmProvider): Promise<OpenAI> {
+    const config = await getConfigForProvider(provider);
+    const entry = getProviderRegistryEntry(provider);
+
+    const apiKey = config?.apiKey || "";
+    const model = config?.model || entry?.defaultModel || "";
+    const baseUrl = config?.baseUrl || entry?.baseUrl || "";
+
+    if (!apiKey) {
         throw new AppError(
-            `Unsupported LLM provider "${provider}". Supported: ${LLM_PROVIDERS.join(", ")}`,
-            httpStatus.BAD_REQUEST
+            `API key is not configured for the LLM provider "${provider}". Configure it in the backoffice.`,
+            httpStatus.BAD_GATEWAY
         );
     }
-    return provider;
-}
 
-const clients: Partial<Record<LlmProvider, OpenAI>> = {};
-
-export function getLlmClient(provider: LlmProvider): OpenAI {
     if (!clients[provider]) {
-        const config = providerConfigs[provider];
-        if (!config.apiKey) {
-            throw new AppError(
-                `API key is not configured for the LLM provider "${provider}"`,
-                httpStatus.BAD_GATEWAY
-            );
-        }
         clients[provider] = new OpenAI({
-            apiKey: config.apiKey,
-            baseURL: config.baseUrl,
-            defaultHeaders: config.defaultHeaders,
+            apiKey,
+            baseURL: baseUrl,
+            defaultHeaders: buildDefaultHeaders(provider),
         });
     }
-    return clients[provider] as OpenAI;
+    return clients[provider];
 }
 
-export function getModelForProvider(provider: LlmProvider): string {
-    return providerConfigs[provider].model;
+export async function getModelForProvider(provider: LlmProvider): Promise<string> {
+    const config = await getConfigForProvider(provider);
+    if (config?.model) return config.model;
+    return getProviderRegistryEntry(provider)?.defaultModel || provider;
 }

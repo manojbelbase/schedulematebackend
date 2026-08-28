@@ -26,6 +26,12 @@ export class User extends BaseEntity {
     @Column({ type: "varchar", length: 20, default: UserRole.USER })
     role!: UserRole;
 
+    @Column({ name: "api_request_limit", type: "int", default: 10 })
+    apiRequestLimit!: number;
+
+    @Column({ name: "api_requests_used", type: "int", default: 0 })
+    apiRequestsUsed!: number;
+
     toJSON() {
         const { password, googleId, ...safe } = this;
         return safe;

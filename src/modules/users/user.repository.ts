@@ -83,6 +83,25 @@ export async function updateUser(
     return await userRepository.save(user);
 }
 
+export async function incrementRequestCount(id: string): Promise<void> {
+    await userRepository.increment({ id }, "apiRequestsUsed", 1);
+}
+
+export async function updateUserLimit(
+    id: string,
+    data: { apiRequestLimit?: number; resetUsed?: boolean }
+): Promise<User | null> {
+    const user = await userRepository.findOne({ where: { id } });
+    if (!user) return null;
+    if (data.apiRequestLimit !== undefined) {
+        user.apiRequestLimit = data.apiRequestLimit;
+    }
+    if (data.resetUsed) {
+        user.apiRequestsUsed = 0;
+    }
+    return await userRepository.save(user);
+}
+
 export async function deleteUser(id: string): Promise<boolean> {
     const result = await userRepository.delete({ id });
     return (result.affected ?? 0) > 0;
