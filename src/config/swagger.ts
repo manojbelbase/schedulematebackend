@@ -1155,6 +1155,40 @@ export const swaggerConfig: JsonObject = {
                 },
             },
         },
+        "/api/backoffice/dashboard/users": {
+            get: {
+                operationId: "BackofficeControllerGetUsersDashboard",
+                tags: ["Backoffice"],
+                summary: "Get aggregate user and API usage metrics (admin only)",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "Users dashboard metrics fetched successfully",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/UsersDashboardResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
     },
     components: {
         securitySchemes: {
@@ -1576,6 +1610,38 @@ export const swaggerConfig: JsonObject = {
                             apiRequestsUsed: { type: "integer", example: 3 },
                         },
                     },
+                },
+            },
+            UsersDashboardData: {
+                type: "object",
+                required: [
+                    "countByRole",
+                    "emailUsers",
+                    "googleUsers",
+                    "totalApiRequestsUsed",
+                    "totalApiRequestLimit",
+                    "usageRatio",
+                ],
+                properties: {
+                    countByRole: {
+                        type: "object",
+                        additionalProperties: { type: "integer" },
+                        example: { user: 120, admin: 8 },
+                    },
+                    emailUsers: { type: "integer", example: 90 },
+                    googleUsers: { type: "integer", example: 38 },
+                    totalApiRequestsUsed: { type: "integer", example: 5123 },
+                    totalApiRequestLimit: { type: "integer", example: 5128 },
+                    usageRatio: { type: "number", format: "float", example: 0.999 },
+                },
+            },
+            UsersDashboardResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: { $ref: "#/components/schemas/UsersDashboardData" },
                 },
             },
         },

@@ -11,11 +11,14 @@ import {
     deleteUserController,
     updateUserLimitController,
 } from "./backoffice.controller";
+import { dashboardRouter } from "../dashboard/dashboard.routes";
 
 export const backofficeRouter: Router = Router();
 
 backofficeRouter.use(authenticate());
 backofficeRouter.use(requireAdmin());
+
+backofficeRouter.use("/dashboard", dashboardRouter);
 
 backofficeRouter.get("/users", asyncHandler(listUsersController));
 backofficeRouter.post("/users", validateBody(addUserSchema), asyncHandler(addUserController));
