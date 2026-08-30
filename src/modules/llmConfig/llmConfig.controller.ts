@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { httpStatus } from "../../constants/httpStatus";
 import { sendSuccess } from "../../lib/response";
+import { parseListQuery } from "../../common/utils/pagination";
 import { LLM_PROVIDER_REGISTRY } from "../../config/llmProviders";
 import {
     createLlmConfigService,
@@ -16,9 +17,10 @@ export async function listLlmProvidersController(_req: Request, res: Response): 
     sendSuccess(res, httpStatus.OK, "LLM providers fetched successfully", LLM_PROVIDER_REGISTRY);
 }
 
-export async function listLlmConfigsController(_req: Request, res: Response): Promise<void> {
-    const configs = await listLlmConfigsService();
-    sendSuccess(res, httpStatus.OK, "LLM configs fetched successfully", configs);
+export async function listLlmConfigsController(req: Request, res: Response): Promise<void> {
+    const query = parseListQuery(req.query);
+    const result = await listLlmConfigsService(query);
+    sendSuccess(res, httpStatus.OK, "LLM configs fetched successfully", result.items, result.pagination);
 }
 
 export async function getLlmConfigController(_req: Request, res: Response): Promise<void> {

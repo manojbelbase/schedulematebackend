@@ -2,13 +2,36 @@ import { AppDataSource } from "../../config/data-source";
 import { AppError } from "../../common/errors/AppError";
 import { httpStatus } from "../../constants/httpStatus";
 import { LlmConfig } from "./llmConfig.entity";
+import type { ListQueryOptions } from "../../common/utils/pagination";
 
 const llmConfigRepository = AppDataSource.getRepository(LlmConfig);
 
-const CONFIG_ID = "00000000-0000-0000-0000-000000000001";
 
-export async function findConfigs(): Promise<LlmConfig[]> {
-    return await llmConfigRepository.find({ order: { createdAt: "ASC" } });
+const ALLOWED_SORT_COLUMNS = ["name", "createdAt", "updatedAt"];
+
+export async function findAllConfigs(query: ListQueryOptions): Promise<{ items: LlmConfig[]; total: number }> {
+    const qb = llmConfigRepository.createQueryBuilder("config");
+
+    if (query.query) {
+        qb.andWhere("config.name ILIKE :query", { query: `%${query.query}%` });
+    }
+
+    if (query.dateFrom) {
+        qb.andWhere("config.createdAt >= :dateFrom", { dateFrom: query.dateFrom });
+    }
+    if (query.dateTo) {
+        qb.andWhere("config.createdAt <= :dateTo", { dateTo: query.dateTo });
+    }
+
+    const total = await qb.getCount();
+
+    const sortBy = ALLOWED_SORT_COLUMNS.includes(query.sortBy) ? query.sortBy : "createdAt";
+    qb.orderBy(`config.${sortBy}`, query.sortOrder);
+    qb.skip(query.page * query.take).take(query.take);
+
+    const items = await qb.getMany();
+
+    return { items, total };
 }
 
 export async function findConfig(id: string): Promise<LlmConfig | null> {

@@ -933,9 +933,18 @@ export const swaggerConfig: JsonObject = {
                 tags: ["Backoffice"],
                 summary: "List LLM configurations (backoffice only)",
                 security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "page", in: "query", required: false, schema: { type: "integer", default: 0, minimum: 0 }, description: "Page number (0-indexed)" },
+                    { name: "take", in: "query", required: false, schema: { type: "integer", default: 10, minimum: 1, maximum: 100 }, description: "Items per page" },
+                    { name: "query", in: "query", required: false, schema: { type: "string" }, description: "Search by config name" },
+                    { name: "dateFrom", in: "query", required: false, schema: { type: "string", format: "date-time" }, description: "Filter by createdAt >= dateFrom" },
+                    { name: "dateTo", in: "query", required: false, schema: { type: "string", format: "date-time" }, description: "Filter by createdAt <= dateTo" },
+                    { name: "sortBy", in: "query", required: false, schema: { type: "string", default: "createdAt" }, description: "Sort field" },
+                    { name: "sortOrder", in: "query", required: false, schema: { type: "string", enum: ["ASC", "DESC"], default: "DESC" }, description: "Sort order" },
+                ],
                 responses: {
                     "200": {
-                        description: "LLM config fetched successfully",
+                        description: "Paginated list of LLM configs",
                         content: {
                             "application/json": {
                                 schema: { $ref: "#/components/schemas/LlmConfigListResponse" },
@@ -1533,11 +1542,24 @@ export const swaggerConfig: JsonObject = {
             },
             LlmConfigListResponse: {
                 type: "object",
-                required: ["success", "message", "data"],
+                required: ["success", "message", "data", "pagination"],
                 properties: {
                     success: { type: "boolean", example: true },
                     message: { type: "string" },
-                    data: { type: "array", items: { $ref: "#/components/schemas/LlmConfigData" } },
+                    data: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/LlmConfigData" },
+                    },
+                    pagination: {
+                        type: "object",
+                        required: ["previousPage", "nextPage", "total", "count"],
+                        properties: {
+                            previousPage: { type: "integer", nullable: true },
+                            nextPage: { type: "integer", nullable: true },
+                            total: { type: "integer" },
+                            count: { type: "integer" },
+                        },
+                    },
                 },
             },
             LlmProvider: {
