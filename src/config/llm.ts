@@ -2,8 +2,8 @@ import OpenAI from "openai";
 import { env } from "./env";
 import { AppError } from "../common/errors/AppError";
 import { httpStatus } from "../constants/httpStatus";
-import { findActiveConfig } from "../modules/llmConfig/llmConfig.repository";
-import type { LlmConfig } from "../modules/llmConfig/llmConfig.entity";
+import { findActiveConfig } from "../modules/backoffice/llmConfig/llmConfig.repository";
+import type { LlmConfig } from "../modules/backoffice/llmConfig/llmConfig.entity";
 import { getProviderRegistryEntry } from "./llmProviders";
 
 export type LlmProvider = string;

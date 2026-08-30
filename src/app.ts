@@ -13,7 +13,7 @@ import { calendarConnectionRouter } from "./modules/calendarConnection/calendarC
 import { chatRouter } from "./modules/chat/chat.routes";
 import { backofficeRouter } from "./modules/backoffice/backoffice.routes";
 import { backofficeAuthRouter } from "./modules/backoffice/backoffice.auth.routes";
-import { llmConfigRouter } from "./modules/llmConfig/llmConfig.routes";
+import { llmConfigRouter } from "./modules/backoffice/llmConfig/llmConfig.routes";
 
 export function createApp(): Express {
     const app = express();

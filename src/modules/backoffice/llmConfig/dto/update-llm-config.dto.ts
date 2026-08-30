@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LLM_PROVIDER_KEYS } from "../../../config/llmProviders";
+import { LLM_PROVIDER_KEYS } from "../../../../config/llmProviders";
 
 export const updateLlmConfigSchema = z.object({
     name: z.string().min(1).max(100).optional(),

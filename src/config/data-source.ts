@@ -6,7 +6,7 @@ import { PasswordReset } from "../modules/passwordReset/passwordReset.entity";
 import { CalendarConnection } from "../modules/calendarConnection/calendarConnection.entity";
 import { ChatConversation } from "../modules/chat/chat-conversation.entity";
 import { ChatMessage } from "../modules/chat/chat-message.entity";
-import { LlmConfig } from "../modules/llmConfig/llmConfig.entity";
+import { LlmConfig } from "../modules/backoffice/llmConfig/llmConfig.entity";
 
 export const AppDataSource = new DataSource({
     type: "postgres",

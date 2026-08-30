@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
-import { httpStatus } from "../../constants/httpStatus";
-import { sendSuccess } from "../../lib/response";
-import { parseListQuery } from "../../common/utils/pagination";
-import { LLM_PROVIDER_REGISTRY } from "../../config/llmProviders";
+import { httpStatus } from "../../../constants/httpStatus";
+import { sendSuccess } from "../../../lib/response";
+import { parseListQuery } from "../../../common/utils/pagination";
+import { LLM_PROVIDER_REGISTRY } from "../../../config/llmProviders";
 import {
     createLlmConfigService,
     deleteLlmConfigService,

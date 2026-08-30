@@ -1,8 +1,8 @@
-import { AppDataSource } from "../../config/data-source";
-import { AppError } from "../../common/errors/AppError";
-import { httpStatus } from "../../constants/httpStatus";
+import { AppDataSource } from "../../../config/data-source";
+import { AppError } from "../../../common/errors/AppError";
+import { httpStatus } from "../../../constants/httpStatus";
 import { LlmConfig } from "./llmConfig.entity";
-import type { ListQueryOptions } from "../../common/utils/pagination";
+import type { ListQueryOptions } from "../../../common/utils/pagination";
 
 const llmConfigRepository = AppDataSource.getRepository(LlmConfig);
 

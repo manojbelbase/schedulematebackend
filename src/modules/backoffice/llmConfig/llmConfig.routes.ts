@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { asyncHandler } from "../../common/middleware/asyncHandler";
-import { authenticate, requireAdmin } from "../../common/middleware/auth";
-import { validateBody } from "../../common/middleware/validateBody";
+import { asyncHandler } from "../../../common/middleware/asyncHandler";
+import { authenticate, requireAdmin } from "../../../common/middleware/auth";
+import { validateBody } from "../../../common/middleware/validateBody";
 import { createLlmConfigSchema } from "./dto/create-llm-config.dto";
 import { updateLlmConfigSchema } from "./dto/update-llm-config.dto";
 import {

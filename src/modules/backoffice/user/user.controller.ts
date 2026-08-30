@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
-import { httpStatus } from "../../constants/httpStatus";
-import { sendSuccess } from "../../lib/response";
-import { parseListQuery } from "../../common/utils/pagination";
-import { listUsersService, addUserService, deleteUserService, updateUserLimitService } from "./backoffice.service";
-import { UserRole } from "../users/user.entity";
+import { httpStatus } from "../../../constants/httpStatus";
+import { sendSuccess } from "../../../lib/response";
+import { parseListQuery } from "../../../common/utils/pagination";
+import { listUsersService, addUserService, deleteUserService, updateUserLimitService } from "./user.service";
+import { UserRole } from "../../users/user.entity";
 import type { AddUserDto } from "./dto/add-user.dto";
 import type { UpdateUserLimitDto } from "./dto/update-user-limit.dto";
 
