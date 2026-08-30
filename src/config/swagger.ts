@@ -1168,8 +1168,12 @@ export const swaggerConfig: JsonObject = {
             get: {
                 operationId: "BackofficeControllerGetUsersDashboard",
                 tags: ["Backoffice"],
-                summary: "Get aggregate user and API usage metrics (admin only)",
+                summary: "Get aggregate user, chat, provider and API usage metrics (admin only)",
                 security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "dateFrom", in: "query", required: false, schema: { type: "string", format: "date-time" }, description: "Filter aggregates by createdAt >= dateFrom" },
+                    { name: "dateTo", in: "query", required: false, schema: { type: "string", format: "date-time" }, description: "Filter aggregates by createdAt <= dateTo" },
+                ],
                 responses: {
                     "200": {
                         description: "Users dashboard metrics fetched successfully",
@@ -1569,11 +1573,11 @@ export const swaggerConfig: JsonObject = {
                     key: { type: "string", example: "deepseek" },
                     label: { type: "string", example: "DeepSeek" },
                     baseUrl: { type: "string", example: "https://api.deepseek.com" },
-                    defaultModel: { type: "string", example: "deepseek-chat" },
+                    defaultModel: { type: "string", example: "deepseek-v4-flash" },
                     models: {
                         type: "array",
                         items: { type: "string" },
-                        example: ["deepseek-chat", "deepseek-reasoner"],
+                        example: ["deepseek-v4-flash", "deepseek-v4-pro"],
                     },
                     requiresReferer: { type: "boolean", example: false },
                 },
@@ -1643,6 +1647,12 @@ export const swaggerConfig: JsonObject = {
                     "totalApiRequestsUsed",
                     "totalApiRequestLimit",
                     "usageRatio",
+                    "countByProvider",
+                    "totalChatConversations",
+                    "totalChatMessages",
+                    "chatMessagesByRole",
+                    "googleCalendarConnected",
+                    "googleCalendarNotConnected",
                 ],
                 properties: {
                     countByRole: {
@@ -1655,6 +1665,20 @@ export const swaggerConfig: JsonObject = {
                     totalApiRequestsUsed: { type: "integer", example: 5123 },
                     totalApiRequestLimit: { type: "integer", example: 5128 },
                     usageRatio: { type: "number", format: "float", example: 0.999 },
+                    countByProvider: {
+                        type: "object",
+                        additionalProperties: { type: "integer" },
+                        example: { deepseek: 3, openrouter: 1 },
+                    },
+                    totalChatConversations: { type: "integer", example: 412 },
+                    totalChatMessages: { type: "integer", example: 8217 },
+                    chatMessagesByRole: {
+                        type: "object",
+                        additionalProperties: { type: "integer" },
+                        example: { user: 4100, assistant: 4117 },
+                    },
+                    googleCalendarConnected: { type: "integer", example: 12 },
+                    googleCalendarNotConnected: { type: "integer", example: 108 },
                 },
             },
             UsersDashboardResponse: {
