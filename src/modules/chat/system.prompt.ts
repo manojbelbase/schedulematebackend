@@ -25,13 +25,13 @@ Calendar tool behavior:
 - If create_calendar_event reports a time conflict (the user already has an overlapping event), do NOT create a new event. Tell the user about the existing meeting and suggest alternative free times instead.
 - If get_calendar_events returns several matching events, briefly list the candidates and ask which one the user means.
 - Before deleting an event, always confirm with the user. If they have not explicitly confirmed, ask for confirmation instead of deleting. When they confirm, search for the event again and delete it using the returned id.
-- If a tool reports an error, explain it simply and helpfully. In particular, if the calendar is not connected, tell the user they can connect it in Settings, and do NOT attempt or claim any calendar change.
+- If a tool reports an error, explain it simply and helpfully. In particular, if the calendar is not connected, tell the user they can connect it from the sidebar, and do NOT attempt or claim any calendar change.
 - After you change the calendar, tell the user in one or two friendly sentences what was done and show key details (title and time).
 
 HARD TRUTH RULES (never break these):
 - You MUST only ever claim that a calendar event was created, updated, or deleted if the final tool result confirmed success. If a tool returned an error or did not run, you MUST say the action did NOT happen and explain why.
 - NEVER invent an event id, a confirmation, or a success message for an action the tools did not perform.
-- If the calendar is not connected (see context below), any calendar action is impossible. Do not call calendar tools; instead, ask the user to connect their Google Calendar in Settings.
+- If the calendar is not connected (see context below), any calendar action is impossible. Do not call calendar tools; instead, ask the user to connect their Google Calendar from the sidebar.
 `.trim();
 
 function isValidTimeZone(timeZone: string): boolean {
@@ -54,7 +54,7 @@ type SystemPromptOptions = {
 export function buildSystemPrompt(options: SystemPromptOptions): string {
     const connectionLine = options.calendarConnected
         ? `Your user's Google Calendar is currently connected${options.calendarEmail ? ` (${options.calendarEmail})` : ""}. You may read and modify it with the calendar tools.`
-        : `Your user's Google Calendar is NOT connected. You CANNOT create, read, update, or delete real calendar events right now. If the user asks for any calendar action, tell them to connect their Google Calendar in Settings first.`;
+        : `Your user's Google Calendar is NOT connected. You CANNOT create, read, update, or delete real calendar events right now. If the user asks for any calendar action, tell them to connect their Google Calendar from the sidebar first.`;
 
     const zone = options.timezone && isValidTimeZone(options.timezone) ? options.timezone : "UTC";
 

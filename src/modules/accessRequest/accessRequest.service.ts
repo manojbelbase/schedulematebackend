@@ -7,6 +7,7 @@ import type { ListQueryOptions } from "../../common/utils/pagination";
 import { findUserById } from "../users/user.repository";
 import {
     createAccessRequest,
+    findLatestAccessRequestByUser,
     listAccessRequests,
     updateAccessRequestStatus,
 } from "./accessRequest.repository";
@@ -44,6 +45,19 @@ export async function listCalendarAccessRequestsService(query: ListQueryOptions)
     const { items, total } = await listAccessRequests(query);
     const pagination = buildPagination(total, query.page, query.take, items.length);
     return { items, pagination };
+}
+
+export async function getMyAccessRequestService(userId: string) {
+    const request = await findLatestAccessRequestByUser(userId);
+    if (!request) {
+        return null;
+    }
+    return {
+        id: request.id,
+        status: request.status,
+        message: request.message,
+        createdAt: request.createdAt,
+    };
 }
 
 export async function updateAccessRequestStatusService(

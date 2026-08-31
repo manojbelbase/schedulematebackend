@@ -591,6 +591,33 @@ export const swaggerConfig: JsonObject = {
                 },
             },
         },
+        "/api/access-request/me": {
+            get: {
+                operationId: "AccessRequestControllerGetMyAccessRequest",
+                tags: ["AccessRequest"],
+                summary:
+                    "Get the current user's latest Google Calendar access request (status for the UI)",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "Latest access request for the current user",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/MyAccessRequestResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
         "/api/chat/conversations": {
             get: {
                 operationId: "ChatControllerListConversations",
@@ -1556,6 +1583,30 @@ export const swaggerConfig: JsonObject = {
                 required: ["status"],
                 properties: {
                     status: { $ref: "#/components/schemas/AccessRequestStatusEnum" },
+                },
+            },
+            MyAccessRequestData: {
+                type: "object",
+                required: ["id", "status", "createdAt"],
+                properties: {
+                    id: { type: "string", format: "uuid" },
+                    status: { $ref: "#/components/schemas/AccessRequestStatusEnum" },
+                    message: { type: "string", nullable: true },
+                    createdAt: { type: "string", format: "date-time" },
+                },
+            },
+            MyAccessRequestResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                        oneOf: [
+                            { $ref: "#/components/schemas/MyAccessRequestData" },
+                            { type: "null" },
+                        ],
+                    },
                 },
             },
             CreateConversationDto: {

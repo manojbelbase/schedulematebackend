@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { AppError } from "../../common/errors/AppError";
 import { httpStatus } from "../../constants/httpStatus";
 import { sendSuccess } from "../../lib/response";
-import { requestCalendarAccess } from "./accessRequest.service";
+import { getMyAccessRequestService, requestCalendarAccess } from "./accessRequest.service";
 import type { RequestAccessDto } from "./dto/request-access.dto";
 
 export async function requestAccessController(req: Request, res: Response): Promise<void> {
@@ -13,4 +13,12 @@ export async function requestAccessController(req: Request, res: Response): Prom
     const { message } = body;
     await requestCalendarAccess(req.user.userId, message);
     sendSuccess(res, httpStatus.CREATED, "Access request submitted. We will notify you once your Google account is approved.");
+}
+
+export async function getMyAccessRequestController(req: Request, res: Response): Promise<void> {
+    if (!req.user) {
+        throw new AppError("Not authenticated", httpStatus.UNAUTHORIZED);
+    }
+    const request = await getMyAccessRequestService(req.user.userId);
+    sendSuccess(res, httpStatus.OK, "Access request fetched successfully", request);
 }

@@ -58,6 +58,13 @@ export async function findAccessRequestById(id: string): Promise<AccessRequest |
     return await accessRequestRepository.findOne({ where: { id } });
 }
 
+export async function findLatestAccessRequestByUser(userId: string): Promise<AccessRequest | null> {
+    return await accessRequestRepository.findOne({
+        where: { userId },
+        order: { createdAt: "DESC" },
+    });
+}
+
 export async function updateAccessRequestStatus(
     id: string,
     status: AccessRequestStatus

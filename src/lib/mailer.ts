@@ -109,8 +109,8 @@ export async function sendAccessRequestStatusEmail(data: {
     if (data.status === "approved") {
         statusMessage =
             "Your request to access the Google Calendar has been <strong>approved</strong>. " +
-            "You should now be able to connect your calendar from Settings. " +
-            "If prompted, make sure you accept the Google tester invite sent to your email.";
+            "You can now connect your calendar from the sidebar. " +
+            "If you still get an error when connecting, please reach out to our support team.";
         subject = "ScheduledMate: Google Calendar access approved";
     } else {
         statusMessage =
