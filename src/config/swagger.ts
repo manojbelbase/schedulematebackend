@@ -35,6 +35,7 @@ export const swaggerConfig: JsonObject = {
         { name: "Health", description: "Server health endpoints" },
         { name: "Auth", description: "Authentication endpoints" },
         { name: "CalendarConnection", description: "Calendar connection endpoints" },
+        { name: "AccessRequest", description: "Google calendar access request endpoints" },
         { name: "Chat", description: "AI chat endpoints" },
         { name: "Backoffice", description: "Backoffice endpoints" },
     ],
@@ -420,6 +421,162 @@ export const swaggerConfig: JsonObject = {
                         content: {
                             "application/json": {
                                 schema: { $ref: "#/components/schemas/MessageResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/backoffice/access-requests": {
+            get: {
+                operationId: "BackofficeAccessRequestControllerList",
+                tags: ["Backoffice"],
+                summary: "List Google Calendar access requests (admin only)",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "page", in: "query", required: false, schema: { type: "integer", default: 0, minimum: 0 }, description: "Page number (0-indexed)" },
+                    { name: "take", in: "query", required: false, schema: { type: "integer", default: 10, minimum: 1, maximum: 100 }, description: "Items per page" },
+                    { name: "query", in: "query", required: false, schema: { type: "string" }, description: "Search by requester email or name" },
+                    { name: "dateFrom", in: "query", required: false, schema: { type: "string", format: "date-time" }, description: "Filter by createdAt >= dateFrom" },
+                    { name: "dateTo", in: "query", required: false, schema: { type: "string", format: "date-time" }, description: "Filter by createdAt <= dateTo" },
+                    { name: "sortBy", in: "query", required: false, schema: { type: "string", default: "createdAt" }, description: "Sort field" },
+                    { name: "sortOrder", in: "query", required: false, schema: { type: "string", enum: ["ASC", "DESC"], default: "DESC" }, description: "Sort order" },
+                ],
+                responses: {
+                    "200": {
+                        description: "Access requests fetched successfully",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/AccessRequestListResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/backoffice/access-requests/{id}/status": {
+            patch: {
+                operationId: "BackofficeAccessRequestControllerUpdateStatus",
+                tags: ["Backoffice"],
+                summary: "Update a Google Calendar access request status (admin only)",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string", format: "uuid" },
+                    },
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/UpdateAccessRequestStatusDto",
+                            },
+                        },
+                    },
+                },
+                responses: {
+                    "200": {
+                        description: "Access request status updated successfully",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    $ref: "#/components/schemas/AccessRequestResponse",
+                                },
+                            },
+                        },
+                    },
+                    "400": {
+                        description: "Invalid status",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "404": {
+                        description: "Access request not found",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/access-request/request-access": {
+            post: {
+                operationId: "AccessRequestControllerRequestAccess",
+                tags: ["AccessRequest"],
+                summary:
+                    "Submit a Google Calendar access request so the admin can add the user as a Google tester",
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/RequestAccessDto" },
+                        },
+                    },
+                },
+                responses: {
+                    "201": {
+                        description: "Access request submitted",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/MessageResponse" },
+                            },
+                        },
+                    },
+                    "400": {
+                        description: "Invalid request body",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
                             },
                         },
                     },
@@ -1330,6 +1487,75 @@ export const swaggerConfig: JsonObject = {
                     data: {
                         $ref: "#/components/schemas/CalendarConnectionStatusData",
                     },
+                },
+            },
+            RequestAccessDto: {
+                type: "object",
+                properties: {
+                    message: { type: "string", maxLength: 1000, example: "Please add me as a tester" },
+                },
+            },
+            AccessRequestStatusEnum: {
+                type: "string",
+                enum: ["pending", "approved", "rejected"],
+            },
+            AccessRequestData: {
+                type: "object",
+                required: ["id", "requesterEmail", "status", "createdAt"],
+                properties: {
+                    id: { type: "string", format: "uuid" },
+                    requesterEmail: { type: "string", format: "email" },
+                    requesterName: { type: "string", nullable: true },
+                    message: { type: "string", nullable: true },
+                    status: { $ref: "#/components/schemas/AccessRequestStatusEnum" },
+                    createdAt: { type: "string", format: "date-time" },
+                    user: {
+                        type: "object",
+                        nullable: true,
+                        properties: {
+                            id: { type: "string", format: "uuid" },
+                            email: { type: "string", format: "email" },
+                            name: { type: "string", nullable: true },
+                        },
+                    },
+                },
+            },
+            AccessRequestResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: { $ref: "#/components/schemas/AccessRequestData" },
+                },
+            },
+            AccessRequestListResponse: {
+                type: "object",
+                required: ["success", "message", "data", "pagination"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/AccessRequestData" },
+                    },
+                    pagination: {
+                        type: "object",
+                        required: ["previousPage", "nextPage", "total", "count"],
+                        properties: {
+                            previousPage: { type: "number", nullable: true },
+                            nextPage: { type: "number", nullable: true },
+                            total: { type: "number" },
+                            count: { type: "number" },
+                        },
+                    },
+                },
+            },
+            UpdateAccessRequestStatusDto: {
+                type: "object",
+                required: ["status"],
+                properties: {
+                    status: { $ref: "#/components/schemas/AccessRequestStatusEnum" },
                 },
             },
             CreateConversationDto: {

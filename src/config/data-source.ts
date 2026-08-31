@@ -7,13 +7,14 @@ import { CalendarConnection } from "../modules/calendarConnection/calendarConnec
 import { ChatConversation } from "../modules/chat/chat-conversation.entity";
 import { ChatMessage } from "../modules/chat/chat-message.entity";
 import { LlmConfig } from "../modules/backoffice/llmConfig/llmConfig.entity";
+import { AccessRequest } from "../modules/accessRequest/accessRequest.entity";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
     url: env.databaseUrl,
     synchronize: false,
     logging: !env.isProduction,
-    entities: [User, PasswordReset, CalendarConnection, ChatConversation, ChatMessage, LlmConfig],
+    entities: [User, PasswordReset, CalendarConnection, ChatConversation, ChatMessage, LlmConfig, AccessRequest],
     migrations: [import.meta.dirname + "/../database/migrations/*.{ts,js}"],
     migrationsTableName: "migrations",
 });

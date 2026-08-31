@@ -11,6 +11,7 @@ import { authRouter } from "./modules/auth/auth.routes";
 import { docsRouter } from "./modules/docs/docs.routes";
 import { calendarConnectionRouter } from "./modules/calendarConnection/calendarConnection.routes";
 import { chatRouter } from "./modules/chat/chat.routes";
+import { accessRequestRouter } from "./modules/accessRequest/accessRequest.routes";
 import { backofficeRouter } from "./modules/backoffice/backoffice.routes";
 import { backofficeAuthRouter } from "./modules/backoffice/backoffice.auth.routes";
 import { llmConfigRouter } from "./modules/backoffice/llmConfig/llmConfig.routes";
@@ -30,6 +31,7 @@ export function createApp(): Express {
     app.use("/api/health", healthRouter);
     app.use("/api/auth", authRouter);
     app.use("/api/calendar-connection", calendarConnectionRouter);
+    app.use("/api/access-request", accessRequestRouter);
     app.use("/api/chat", chatRouter);
     app.use("/api/backoffice/auth", backofficeAuthRouter);
     app.use("/api/backoffice/llm-config", llmConfigRouter);

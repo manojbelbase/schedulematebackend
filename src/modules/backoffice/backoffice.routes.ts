@@ -3,6 +3,7 @@ import { authenticate } from "../../common/middleware/auth";
 import { requireAdmin } from "../../common/middleware/auth";
 import { dashboardRouter } from "./dashboard/dashboard.routes";
 import { userRouter } from "./user/user.routes";
+import { accessRequestRouter } from "./accessRequest/accessRequest.routes";
 
 export const backofficeRouter: Router = Router();
 
@@ -11,3 +12,4 @@ backofficeRouter.use(requireAdmin());
 
 backofficeRouter.use("/dashboard", dashboardRouter);
 backofficeRouter.use("/users", userRouter);
+backofficeRouter.use("/access-requests", accessRequestRouter);
