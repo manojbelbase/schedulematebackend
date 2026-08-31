@@ -113,7 +113,18 @@ export async function sendMessageNonStreaming(
     if (user.apiRequestsUsed >= user.apiRequestLimit) {
         throw new AppError(
             "Request limit exceeded. Please upgrade your plan or contact admin.",
-            httpStatus.TOO_MANY_REQUESTS
+            httpStatus.TOO_MANY_REQUESTS,
+            {
+                code: "USER_QUOTA_EXCEEDED",
+                upgradeInfo: {
+                    message: "Upgrade your plan to continue using ScheduledMate.",
+                    contact: {
+                        email: "manoj.blacktech@gmail.com",
+                        phone: "+977 9864415071",
+                        portfolio: "www.manojbelbase.com.np",
+                    },
+                },
+            }
         );
     }
 

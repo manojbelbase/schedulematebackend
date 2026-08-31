@@ -9,7 +9,11 @@ export function errorHandler(
     _next: NextFunction
 ): void {
     if (err instanceof AppError) {
-        res.status(err.statusCode).json({ success: false, message: err.message });
+        const response: Record<string, unknown> = { success: false, message: err.message };
+        if (err.payload) {
+            response.payload = err.payload;
+        }
+        res.status(err.statusCode).json(response);
         return;
     }
 
