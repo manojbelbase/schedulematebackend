@@ -9,7 +9,8 @@ export async function requestAccessController(req: Request, res: Response): Prom
     if (!req.user) {
         throw new AppError("Not authenticated", httpStatus.UNAUTHORIZED);
     }
-    const { message } = req.body as RequestAccessDto;
+    const body = (req.body ?? {}) as Partial<RequestAccessDto>;
+    const { message } = body;
     await requestCalendarAccess(req.user.userId, message);
     sendSuccess(res, httpStatus.CREATED, "Access request submitted. We will notify you once your Google account is approved.");
 }

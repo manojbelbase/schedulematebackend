@@ -23,7 +23,7 @@ export async function requestCalendarAccess(userId: string, message?: string): P
         userId,
         requesterEmail: user.email,
         requesterName: user.name ?? null,
-        message: message ?? null,
+        message: message ?? `Requested Google Calendar access from the web app (${user.email}).`,
     });
 
     try {
