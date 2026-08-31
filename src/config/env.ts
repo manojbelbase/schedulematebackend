@@ -38,7 +38,7 @@ export const env = {
     smtpPass: process.env.SMTP_PASS ?? '',
     smtpFrom: process.env.SMTP_FROM ?? (process.env.SMTP_USER ?? ''),
     smtpSecure: (process.env.SMTP_SECURE ?? 'false') === 'true',
-    otpTtlMinutes: Number(process.env.OTP_TTL_MINUTES) || 10,
+    otpTtlMinutes: Number(process.env.OTP_TTL_MINUTES) || 5,
     adminEmail: process.env.ADMIN_EMAIL ?? '',
     backofficeEmail: process.env.BACKOFFICE_EMAIL ?? '',
     backofficePassword: process.env.BACKOFFICE_PASSWORD ?? '',

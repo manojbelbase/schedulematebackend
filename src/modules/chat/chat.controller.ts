@@ -8,7 +8,7 @@ import {
     getConversationMessages,
     listConversations,
     removeConversation,
-    sendMessageNonStreaming,
+    sendChatMessage,
 } from "./chat.service";
 import type { CreateConversationDto } from "./dto/create-conversation.dto";
 import type { SendMessageDto } from "./dto/send-message.dto";
@@ -90,7 +90,7 @@ export async function sendMessageController(
     }
     const conversationId = requireConversationId(req);
     const { content, timezone, provider } = req.body as SendMessageDto;
-    const result = await sendMessageNonStreaming(
+    const result = await sendChatMessage(
         req.user.userId,
         conversationId,
         content,

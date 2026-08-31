@@ -93,7 +93,7 @@ export async function removeConversation(userId: string, conversationId: string)
     await deleteConversation(conversationId);
 }
 
-export async function sendMessageNonStreaming(
+export async function sendChatMessage(
     userId: string,
     conversationId: string,
     content: string,
