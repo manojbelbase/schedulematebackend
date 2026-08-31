@@ -117,7 +117,10 @@ export async function refreshController(req: Request, res: Response): Promise<vo
     setAccessTokenCookie(res, accessToken);
     setRefreshTokenCookie(res, nextRefreshToken);
 
-    sendSuccess(res, httpStatus.OK, "Token refreshed");
+    sendSuccess(res, httpStatus.OK, "Token refreshed", {
+        accessToken,
+        refreshToken: nextRefreshToken,
+    });
 }
 
 export async function logoutController(req: Request, res: Response): Promise<void> {

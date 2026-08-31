@@ -207,7 +207,7 @@ export const swaggerConfig: JsonObject = {
                         description: "New access token issued",
                         content: {
                             "application/json": {
-                                schema: { $ref: "#/components/schemas/MessageResponse" },
+                                schema: { $ref: "#/components/schemas/RefreshResponse" },
                             },
                         },
                     },
@@ -1490,6 +1490,22 @@ export const swaggerConfig: JsonObject = {
                         required: ["user", "accessToken"],
                         properties: {
                             user: { $ref: "#/components/schemas/PublicUser" },
+                            accessToken: { type: "string" },
+                            refreshToken: { type: "string" },
+                        },
+                    },
+                },
+            },
+            RefreshResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                        type: "object",
+                        required: ["accessToken"],
+                        properties: {
                             accessToken: { type: "string" },
                             refreshToken: { type: "string" },
                         },
