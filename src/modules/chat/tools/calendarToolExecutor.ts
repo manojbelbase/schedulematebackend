@@ -1,6 +1,6 @@
 import { AppError } from "../../../common/errors/AppError";
 import { logger } from "../../../lib/logger";
-import { toCalendarDateTime } from "../../../common/utils/timezone";
+import { localDateTimeToUtc, toCalendarDateTime } from "../../../common/utils/timezone";
 import { getOAuthClientForUser } from "../../calendarConnection/calendarConnection.service";
 import {
     createCalendarEvent,
@@ -25,7 +25,9 @@ import {
     type UpdateCalendarEventArgs,
 } from "./calendarTools";
 
-export type ToolExecutionContext = Record<string, never>;
+export type ToolExecutionContext = {
+    timeZone?: string | undefined;
+};
 
 export type ToolExecutionResult =
     | { ok: true; data: unknown }
@@ -56,17 +58,15 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function parseIsoDateTime(value: string, field: string): string {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-        throw new Error(`${field} is not a valid ISO 8601 date-time`);
-    }
-    return date.toISOString();
-}
-
-function resolveEventTime(value: string, field: string, timeZone?: string): { localDateTime: string; timeZone: string } {
+function resolveEventTime(
+    value: string,
+    field: string,
+    timeZone?: string,
+    defaultTimeZone?: string
+): { localDateTime: string; timeZone: string } {
     try {
-        return toCalendarDateTime(value, timeZone);
+        const storageZone = defaultTimeZone ?? timeZone;
+        return toCalendarDateTime(value, storageZone);
     } catch {
         throw new Error(`${field} is not a valid ISO 8601 date-time`);
     }
@@ -110,9 +110,12 @@ export async function executeCalendarTool(
             const { timeMin, timeMax, query, maxResults } = parsed.data as GetCalendarEventsArgs;
             return runWithGuards(async () => {
                 const client = await getOAuthClientForUser(userId);
-                const start = parseIsoDateTime(timeMin, "timeMin");
-                const end = parseIsoDateTime(timeMax, "timeMax");
-                if (new Date(end).getTime() <= new Date(start).getTime()) {
+                const startTz = _context.timeZone ?? "UTC";
+                const start = resolveEventTime(timeMin, "timeMin", startTz);
+                const end = resolveEventTime(timeMax, "timeMax", startTz);
+                const startUtc = localDateTimeToUtc(start.localDateTime, start.timeZone);
+                const endUtc = localDateTimeToUtc(end.localDateTime, end.timeZone);
+                if (endUtc.getTime() <= startUtc.getTime()) {
                     return { ok: false, error: "timeMax must be later than timeMin" };
                 }
                 const listOptions: {
@@ -120,7 +123,7 @@ export async function executeCalendarTool(
                     timeMax: string;
                     query?: string;
                     maxResults?: number;
-                } = { timeMin: start, timeMax: end };
+                } = { timeMin: startUtc.toISOString(), timeMax: endUtc.toISOString() };
                 if (query !== undefined) listOptions.query = query;
                 if (maxResults !== undefined) listOptions.maxResults = maxResults;
                 const events = await listCalendarEvents(client, listOptions);
@@ -135,14 +138,14 @@ export async function executeCalendarTool(
                 parsed.data as CreateCalendarEventArgs;
             return runWithGuards(async () => {
                 const client = await getOAuthClientForUser(userId);
-                const start = resolveEventTime(startTime, "startTime", timeZone);
-                const end = resolveEventTime(endTime, "endTime", timeZone);
+                const start = resolveEventTime(startTime, "startTime", timeZone, _context.timeZone);
+                const end = resolveEventTime(endTime, "endTime", timeZone, _context.timeZone);
                 if (toOrderable(end.localDateTime) <= toOrderable(start.localDateTime)) {
                     return { ok: false, error: "endTime must be later than startTime" };
                 }
                 const conflicts = await listCalendarEvents(client, {
-                    timeMin: new Date(toOrderable(start.localDateTime)).toISOString(),
-                    timeMax: new Date(toOrderable(end.localDateTime)).toISOString(),
+                    timeMin: localDateTimeToUtc(start.localDateTime, start.timeZone).toISOString(),
+                    timeMax: localDateTimeToUtc(end.localDateTime, end.timeZone).toISOString(),
                 });
                 if (conflicts.length > 0) {
                     return {
@@ -204,12 +207,12 @@ export async function executeCalendarTool(
                 if (description !== undefined) update.description = description;
                 if (timeZone !== undefined) update.timeZone = timeZone;
                 if (startTime !== undefined) {
-                    const resolved = resolveEventTime(startTime, "startTime", timeZone);
+                    const resolved = resolveEventTime(startTime, "startTime", timeZone, _context.timeZone);
                     update.startTime = resolved.localDateTime;
                     update.timeZone = resolved.timeZone;
                 }
                 if (endTime !== undefined) {
-                    const resolved = resolveEventTime(endTime, "endTime", timeZone);
+                    const resolved = resolveEventTime(endTime, "endTime", timeZone, _context.timeZone);
                     update.endTime = resolved.localDateTime;
                     update.timeZone = resolved.timeZone;
                 }

@@ -3,6 +3,7 @@ import type {
     ChatCompletionMessageToolCall,
 } from "openai/resources/chat/completions";
 import { AppError } from "../../common/errors/AppError";
+import type { MemoryType } from "./chat-memory.entity";
 import {
     getLlmClient,
     getModelForProvider,
@@ -25,9 +26,21 @@ export type ChatTurn = {
     content: string;
 };
 
+export type MemoryItem = {
+    content: string;
+    memoryType: MemoryType;
+};
+
 export type AgentTurnOptions = {
     provider?: string | undefined;
     timezone?: string | undefined;
+    memories?: MemoryItem[] | undefined;
+    /**
+     * When provided, replaces the default ScheduledMate system prompt entirely.
+     * Used for internal LLM sub-tasks such as memory extraction, where we want
+     * the model to follow custom instructions (e.g. return strict JSON).
+     */
+    systemPromptOverride?: string | undefined;
 };
 
 function toAppError(err: unknown): AppError {
@@ -56,7 +69,8 @@ function toAppError(err: unknown): AppError {
 
 async function runSingleToolCall(
     userId: string,
-    toolCall: ChatCompletionMessageToolCall
+    toolCall: ChatCompletionMessageToolCall,
+    timeZone?: string
 ): Promise<ToolExecutionResult> {
     if (toolCall.type !== "function") {
         return { ok: false, error: "Unsupported tool call type." };
@@ -67,7 +81,8 @@ async function runSingleToolCall(
     } catch {
         return { ok: false, error: "Tool arguments could not be parsed as JSON." };
     }
-    return await executeCalendarTool(userId, toolCall.function.name, rawArgs, {});
+    const context = timeZone ? { timeZone } : {};
+    return await executeCalendarTool(userId, toolCall.function.name, rawArgs, context);
 }
 
 export async function runAgentTurn(
@@ -77,29 +92,41 @@ export async function runAgentTurn(
 ): Promise<string> {
     const provider = await resolveLlmProvider(options.provider);
     const client = await getLlmClient(provider);
-    const connection = await getConnectionStatus(userId);
+    const isSubTask = options.systemPromptOverride !== undefined;
+
+    let calendarConnected = false;
+    let calendarEmail: string | null = null;
+    if (!isSubTask) {
+        const connection = await getConnectionStatus(userId);
+        calendarConnected = connection.connected;
+        calendarEmail = connection.googleEmail;
+    }
+
+    const systemPrompt = options.systemPromptOverride
+        ? options.systemPromptOverride
+        : buildSystemPrompt({
+            timezone: options.timezone,
+            calendarConnected,
+            calendarEmail,
+            memories: options.memories,
+        });
+
     const messages: ChatCompletionMessageParam[] = [
-        {
-            role: "system",
-            content: buildSystemPrompt({
-                timezone: options.timezone,
-                calendarConnected: connection.connected,
-                calendarEmail: connection.googleEmail,
-            }),
-        },
+        { role: "system", content: systemPrompt },
         ...history.map(
             (turn): ChatCompletionMessageParam => ({ role: turn.role, content: turn.content })
         ),
     ];
 
-    for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
+    for (let iteration = 0; iteration < (isSubTask ? 1 : MAX_TOOL_ITERATIONS); iteration++) {
         let completion;
         try {
             completion = await client.chat.completions.create({
                 model: await getModelForProvider(provider),
                 messages,
-                tools: calendarTools,
-                tool_choice: "auto",
+                ...(isSubTask
+                    ? {}
+                    : { tools: calendarTools, tool_choice: "auto" as const }),
             });
         } catch (err) {
             throw toAppError(err);
@@ -129,7 +156,7 @@ export async function runAgentTurn(
         messages.push(message);
 
         for (const toolCall of message.tool_calls) {
-            const toolResult = await runSingleToolCall(userId, toolCall);
+            const toolResult = await runSingleToolCall(userId, toolCall, options.timezone);
             messages.push({
                 role: "tool",
                 tool_call_id: toolCall.id,

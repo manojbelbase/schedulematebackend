@@ -1,4 +1,5 @@
 import { formatNow } from "../../common/utils/timezone";
+import type { MemoryItem } from "./agent.service";
 
 const BASE_PROMPT = `
 You are the ScheduledMate assistant, a helpful AI chat companion inside the ScheduledMate app.
@@ -18,6 +19,7 @@ General rules:
 
 Calendar tool behavior:
 - Resolve relative dates such as "today", "tomorrow", "this week" or "next Friday" against the current date and time given below.
+- Every date-time you pass to a calendar tool MUST be the user's LOCAL wall-clock time WITH the user's timezone offset appended. The user's offset is determinable from the current time and timezone given below (Asia/Kathmandu is UTC+05:45, so 10:00 PM local is "2026-09-01T22:00:00+05:45"). Write the clock time the user literally stated and append the user's offset — do NOT convert the clock time to UTC yourself. NEVER pass a bare time without an offset.
 - Always use the get_calendar_events tool first to find the exact event id before updating or deleting. Never guess or invent an event id.
 - When creating an event you need the title plus a start time and end time. If any required detail is missing or unclear, ask the user a clarifying question instead of guessing.
 - If the user wants or implies a video meeting (Google Meet), pass meet: true to create_calendar_event so a Google Meet link is added.
@@ -43,12 +45,11 @@ function isValidTimeZone(timeZone: string): boolean {
     }
 }
 
-
-
 type SystemPromptOptions = {
     calendarConnected: boolean;
     calendarEmail?: string | null;
     timezone?: string | undefined;
+    memories?: MemoryItem[] | undefined;
 };
 
 export function buildSystemPrompt(options: SystemPromptOptions): string {
@@ -58,6 +59,42 @@ export function buildSystemPrompt(options: SystemPromptOptions): string {
 
     const zone = options.timezone && isValidTimeZone(options.timezone) ? options.timezone : "UTC";
 
+    let memoriesSection = "";
+    if (options.memories && options.memories.length > 0) {
+        const memoriesByType = options.memories.reduce(
+            (acc, mem) => {
+                const type = mem.memoryType;
+                if (!acc[type]) {
+                    acc[type] = [];
+                }
+                const arr = acc[type];
+                if (arr) {
+                    arr.push(mem);
+                }
+                return acc;
+            },
+            {} as Record<string, MemoryItem[]>
+        );
+
+        memoriesSection = "\n\n# User Long-term Memories";
+
+        const typeLabels: Record<string, string> = {
+            preference: "Preferences",
+            fact: "Facts",
+            instruction: "Instructions/Rules",
+            other: "Other Information",
+        };
+
+        for (const [type, mems] of Object.entries(memoriesByType)) {
+            if (mems.length > 0) {
+                memoriesSection += `\n## ${typeLabels[type]}`;
+                mems.forEach((mem) => {
+                    memoriesSection += `\n- ${mem.content}`;
+                });
+            }
+        }
+    }
+
     return `
 ${BASE_PROMPT}
 
@@ -65,6 +102,6 @@ ${BASE_PROMPT}
 ${connectionLine}
 
 # Current date and time
-${formatNow(zone)} (${zone})
+${formatNow(zone)} (${zone})${memoriesSection}
 `.trim();
 }

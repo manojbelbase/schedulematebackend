@@ -50,8 +50,25 @@ export async function listMessagesByConversation(conversationId: string): Promis
     });
 }
 
+export async function listRecentMessagesByConversation(
+    conversationId: string,
+    take: number
+): Promise<ChatMessage[]> {
+    const messages = await messageRepository.find({
+        where: { conversationId },
+        order: { createdAt: "DESC" },
+        take,
+    });
+    return messages.reverse();
+}
+
 export async function touchConversation(id: string): Promise<void> {
-    await conversationRepository.update(id, { updatedAt: new Date() });
+    await conversationRepository
+        .createQueryBuilder()
+        .update(ChatConversation)
+        .set({ updatedAt: () => "NOW()" })
+        .where("id = :id", { id })
+        .execute();
 }
 
 export async function renameConversation(id: string, title: string): Promise<void> {

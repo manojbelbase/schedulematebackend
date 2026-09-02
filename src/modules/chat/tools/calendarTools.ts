@@ -47,17 +47,17 @@ export const calendarTools: ChatCompletionTool[] = [
         function: {
             name: GET_CALENDAR_EVENTS,
             description:
-                "Read the user's Google Calendar events within a time range. Use timeMin and timeMax as ISO 8601 date-times with a timezone offset (for example 2026-08-23T15:00:00+05:45). Resolve relative dates like 'today', 'tomorrow' or 'this week' against the current time provided in the system context. Use the optional query to filter events by a keyword.",
+                "Read the user's Google Calendar events within a time range. timeMin and timeMax MUST be ISO 8601 date-times with an explicit timezone offset (the user's local wall-clock time plus their offset, for example 2026-08-23T22:00:00+05:45). The user's offset is given in the system context. Never omit the offset and never convert to UTC yourself. Resolve relative dates like 'today', 'tomorrow' or 'this week' against the current time provided in the system context. Use the optional query to filter events by a keyword.",
             parameters: {
                 type: "object",
                 properties: {
                     timeMin: {
                         type: "string",
-                        description: "Start of the range, ISO 8601 date-time with offset",
+                        description: "Start of the range: user's local wall-clock date-time in their timezone, no offset",
                     },
                     timeMax: {
                         type: "string",
-                        description: "End of the range, ISO 8601 date-time with offset",
+                        description: "End of the range: user's local wall-clock date-time in their timezone, no offset",
                     },
                     query: {
                         type: "string",
@@ -81,18 +81,18 @@ export const calendarTools: ChatCompletionTool[] = [
         function: {
             name: CREATE_CALENDAR_EVENT,
             description:
-                "Create a new event on the user's Google Calendar. startTime and endTime must be ISO 8601 date-times; if you only have a naive local time without an offset, it will be interpreted in the user's timezone. Only call after you have the title and both start and end times; otherwise ask the user for the missing details. If the user wants a video meeting, set meet to true to add a Google Meet link.",
+                "Create a new event on the user's Google Calendar. startTime and endTime MUST be ISO 8601 date-times with an explicit timezone offset: the user's local wall-clock time plus their offset (for example 2026-08-23T22:00:00+05:45 for 10:00 PM in Nepal). Do NOT convert to UTC yourself and NEVER omit the offset. The backend will normalize the instant into the user's timezone. Only call after you have the title and both start and end times; otherwise ask the user for the missing details. If the user wants a video meeting, set meet to true to add a Google Meet link.",
             parameters: {
                 type: "object",
                 properties: {
                     title: { type: "string", description: "Event title" },
                     startTime: {
                         type: "string",
-                        description: "Start date-time, ISO 8601 with optional offset",
+                        description: "Start date-time, ISO 8601 WITH explicit timezone offset or Z (never omit the offset)",
                     },
                     endTime: {
                         type: "string",
-                        description: "End date-time, ISO 8601 with optional offset",
+                        description: "End date-time, ISO 8601 WITH explicit timezone offset or Z (never omit the offset)",
                     },
                     description: { type: "string", description: "Optional description" },
                     attendees: {
@@ -121,7 +121,7 @@ export const calendarTools: ChatCompletionTool[] = [
         function: {
             name: UPDATE_CALENDAR_EVENT,
             description:
-                "Update an existing event on the user's Google Calendar. eventId must be an exact Google Calendar event id obtained from get_calendar_events. Never guess or invent an id. If you do not have the id, first call get_calendar_events with a suitable query to find it. Provide at least one field to change.",
+                "Update an existing event on the user's Google Calendar. eventId must be an exact Google Calendar event id obtained from get_calendar_events. Never guess or invent an id. If you do not have the id, first call get_calendar_events with a suitable query to find it. Provide at least one field to change. startTime and endTime, if provided, MUST be ISO 8601 with an explicit timezone offset (user's local wall-clock plus their offset); never omit the offset and never convert to UTC yourself.",
             parameters: {
                 type: "object",
                 properties: {
@@ -129,11 +129,11 @@ export const calendarTools: ChatCompletionTool[] = [
                     title: { type: "string", description: "New event title" },
                     startTime: {
                         type: "string",
-                        description: "New start date-time, ISO 8601 with optional offset",
+                        description: "New start date-time, ISO 8601 WITH explicit timezone offset or Z (never omit the offset)",
                     },
                     endTime: {
                         type: "string",
-                        description: "New end date-time, ISO 8601 with optional offset",
+                        description: "New end date-time, ISO 8601 WITH explicit timezone offset or Z (never omit the offset)",
                     },
                     description: { type: "string", description: "New description" },
                     timeZone: {

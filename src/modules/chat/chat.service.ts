@@ -7,11 +7,14 @@ import {
     findConversationForUser,
     listConversationsByUser,
     listMessagesByConversation,
+    listRecentMessagesByConversation,
     renameConversation,
     touchConversation,
 } from "./chat.repository";
 import { runAgentTurn } from "./agent.service";
+import type { MemoryItem } from "./agent.service";
 import { findUserById, incrementRequestCount } from "../users/user.repository";
+import { extractAndStoreMemory, retrieveRelevantMemories } from "./memory.service";
 
 export type PublicConversation = {
     id: string;
@@ -129,13 +132,30 @@ export async function sendChatMessage(
     }
 
     const userMessage = await addMessage({ conversationId, role: "user", content });
-    await touchConversation(conversationId);
 
-    const history = await listMessagesByConversation(conversationId);
+    extractAndStoreMemory(userId, conversationId, content).catch(() => {
+        // Silently fail - memory extraction should not block chat
+    });
+
+    const recentMessages = (
+        await listRecentMessagesByConversation(conversationId, 10)
+    ).map((m) => ({ role: m.role, content: m.content }));
+
+    let relevantMemories: MemoryItem[] = [];
+    try {
+        const rawMemories = await retrieveRelevantMemories(userId, content, 5);
+        relevantMemories = rawMemories.map((m) => ({
+            content: m.content,
+            memoryType: m.memoryType,
+        }));
+    } catch {
+        // Memory retrieval failed - continue without it
+    }
+
     const replyText = await runAgentTurn(
         userId,
-        history.map((m) => ({ role: m.role, content: m.content })),
-        { timezone, provider }
+        recentMessages,
+        { timezone, provider, memories: relevantMemories }
     );
 
     await incrementRequestCount(userId);

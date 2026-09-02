@@ -56,6 +56,19 @@ export function toCalendarDateTime(value: string, timeZone?: string): CalendarDa
     return { localDateTime: toZoneNaive(instant, zone), timeZone: zone };
 }
 
+export function localDateTimeToUtc(localDateTime: string, zone: string): Date {
+    if (Number.isNaN(new Date(`${localDateTime}Z`).getTime())) {
+        throw new Error(`"${localDateTime}" is not a valid naive date-time`);
+    }
+    let guess = Date.parse(`${localDateTime}Z`);
+    for (let i = 0; i < 2; i++) {
+        const naiveOfGuess = toZoneNaive(new Date(guess), zone);
+        const deltaMs = Date.parse(`${localDateTime}Z`) - Date.parse(`${naiveOfGuess}Z`);
+        guess += deltaMs;
+    }
+    return new Date(guess);
+}
+
 export function formatNow(zone: string): string {
     return new Intl.DateTimeFormat("en-US", {
         timeZone: zone,

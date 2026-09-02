@@ -19,8 +19,14 @@ function requireConversationId(req: Request): string {
     if (!id) {
         throw new AppError("Conversation id is required", httpStatus.BAD_REQUEST);
     }
+    if (!UUID_REGEX.test(id)) {
+        throw new AppError("Conversation id must be a valid UUID", httpStatus.BAD_REQUEST);
+    }
     return id;
 }
+
+const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function listConversationsController(
     req: Request,

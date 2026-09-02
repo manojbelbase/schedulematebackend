@@ -1348,6 +1348,177 @@ export const swaggerConfig: JsonObject = {
                 },
             },
         },
+        "/api/backoffice/embedding-config": {
+            get: {
+                operationId: "EmbeddingConfigControllerListConfigs",
+                tags: ["Backoffice"],
+                summary: "List embedding configurations (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: "page", in: "query", required: false, schema: { type: "integer", default: 0, minimum: 0 }, description: "Page number (0-indexed)" },
+                    { name: "take", in: "query", required: false, schema: { type: "integer", default: 10, minimum: 1, maximum: 100 }, description: "Items per page" },
+                    { name: "query", in: "query", required: false, schema: { type: "string" }, description: "Search by config name" },
+                    { name: "dateFrom", in: "query", required: false, schema: { type: "string", format: "date-time" }, description: "Filter by createdAt >= dateFrom" },
+                    { name: "dateTo", in: "query", required: false, schema: { type: "string", format: "date-time" }, description: "Filter by createdAt <= dateTo" },
+                    { name: "sortBy", in: "query", required: false, schema: { type: "string", default: "createdAt" }, description: "Sort field" },
+                    { name: "sortOrder", in: "query", required: false, schema: { type: "string", enum: ["ASC", "DESC"], default: "DESC" }, description: "Sort order" },
+                ],
+                responses: {
+                    "200": {
+                        description: "Paginated list of embedding configs",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/EmbeddingConfigListResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+            post: {
+                operationId: "EmbeddingConfigControllerCreateConfig",
+                tags: ["Backoffice"],
+                summary: "Create an embedding configuration (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: { $ref: "#/components/schemas/CreateEmbeddingConfigDto" },
+                        },
+                    },
+                },
+                responses: {
+                    "200": {
+                        description: "Embedding config created successfully",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/EmbeddingConfigResponse" },
+                            },
+                        },
+                    },
+                    "400": {
+                        description: "Invalid request body",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/backoffice/embedding-config/providers": {
+            get: {
+                operationId: "EmbeddingConfigControllerListProviders",
+                tags: ["Backoffice"],
+                summary: "List supported embedding providers for the dropdown (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "Supported embedding providers",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/EmbeddingProviderListResponse" },
+                            },
+                        },
+                    },
+                    "401": {
+                        description: "Not authenticated",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                    "403": {
+                        description: "Backoffice access required",
+                        content: {
+                            "application/json": {
+                                schema: { $ref: "#/components/schemas/ErrorResponse" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "/api/backoffice/embedding-config/active": {
+            get: {
+                operationId: "EmbeddingConfigControllerGetActiveConfig",
+                tags: ["Backoffice"],
+                summary: "Get the active embedding configuration (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    "200": {
+                        description: "Active embedding config fetched successfully",
+                        content: { "application/json": { schema: { $ref: "#/components/schemas/EmbeddingConfigResponse" } } },
+                    },
+                },
+            },
+        },
+        "/api/backoffice/embedding-config/{id}": {
+            patch: {
+                operationId: "EmbeddingConfigControllerUpdateConfig",
+                tags: ["Backoffice"],
+                summary: "Update an embedding configuration (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+                requestBody: {
+                    required: true,
+                    content: { "application/json": { schema: { $ref: "#/components/schemas/UpdateEmbeddingConfigDto" } } },
+                },
+                responses: {
+                    "200": {
+                        description: "Embedding config updated successfully",
+                        content: { "application/json": { schema: { $ref: "#/components/schemas/EmbeddingConfigResponse" } } },
+                    },
+                    "400": { description: "Invalid request body", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                    "404": { description: "Embedding config not found", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                },
+            },
+            delete: {
+                operationId: "EmbeddingConfigControllerDeleteConfig",
+                tags: ["Backoffice"],
+                summary: "Delete an embedding configuration (backoffice only)",
+                security: [{ bearerAuth: [] }],
+                parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+                responses: {
+                    "200": { description: "Embedding config deleted successfully", content: { "application/json": { schema: { $ref: "#/components/schemas/MessageResponse" } } } },
+                    "404": { description: "Embedding config not found", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } } },
+                },
+            },
+        },
         "/api/backoffice/dashboard/users": {
             get: {
                 operationId: "BackofficeControllerGetUsersDashboard",
@@ -1619,7 +1790,6 @@ export const swaggerConfig: JsonObject = {
                 type: "object",
                 required: ["content"],
                 properties: {
-                    conversationId: { type: "string", format: "uuid", nullable: true },
                     content: { type: "string", minLength: 1, maxLength: 10000 },
                     timezone: {
                         type: "string",
@@ -1896,6 +2066,99 @@ export const swaggerConfig: JsonObject = {
                 },
             },
             UpdateLlmConfigDto: {
+                type: "object",
+                properties: {
+                    name: { type: "string", minLength: 1, maxLength: 100 },
+                    isActive: { type: "boolean" },
+                    activeProvider: { type: "string", minLength: 1, maxLength: 100 },
+                    apiKey: { type: "string", maxLength: 500 },
+                    model: { type: "string", maxLength: 200 },
+                    baseUrl: { type: "string", format: "uri", maxLength: 500 },
+                },
+            },
+            EmbeddingConfigData: {
+                type: "object",
+                required: ["id", "name", "isActive", "activeProvider", "apiKey", "model", "baseUrl", "dimension"],
+                properties: {
+                    id: { type: "string", format: "uuid" },
+                    name: { type: "string", example: "Production" },
+                    isActive: { type: "boolean", example: true },
+                    activeProvider: { type: "string", example: "openrouter" },
+                    apiKey: { type: "string", example: "sk-..." },
+                    model: { type: "string", example: "openai/text-embedding-3-small" },
+                    baseUrl: { type: "string", example: "https://openrouter.ai/api/v1" },
+                    dimension: { type: "integer", example: 1536 },
+                },
+            },
+            EmbeddingConfigResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: { $ref: "#/components/schemas/EmbeddingConfigData" },
+                },
+            },
+            EmbeddingConfigListResponse: {
+                type: "object",
+                required: ["success", "message", "data", "pagination"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/EmbeddingConfigData" },
+                    },
+                    pagination: {
+                        type: "object",
+                        required: ["previousPage", "nextPage", "total", "count"],
+                        properties: {
+                            previousPage: { type: "integer", nullable: true },
+                            nextPage: { type: "integer", nullable: true },
+                            total: { type: "integer" },
+                            count: { type: "integer" },
+                        },
+                    },
+                },
+            },
+            EmbeddingProvider: {
+                type: "object",
+                required: ["key", "label", "baseUrl", "defaultModel", "models", "dimension"],
+                properties: {
+                    key: { type: "string", example: "openrouter" },
+                    label: { type: "string", example: "OpenRouter" },
+                    baseUrl: { type: "string", example: "https://openrouter.ai/api/v1" },
+                    defaultModel: { type: "string", example: "openai/text-embedding-3-small" },
+                    models: {
+                        type: "array",
+                        items: { type: "string" },
+                        example: ["openai/text-embedding-3-small", "openai/text-embedding-3-large"],
+                    },
+                    dimension: { type: "integer", example: 1536 },
+                    requiresReferer: { type: "boolean", example: true },
+                },
+            },
+            EmbeddingProviderListResponse: {
+                type: "object",
+                required: ["success", "message", "data"],
+                properties: {
+                    success: { type: "boolean", example: true },
+                    message: { type: "string" },
+                    data: { type: "array", items: { $ref: "#/components/schemas/EmbeddingProvider" } },
+                },
+            },
+            CreateEmbeddingConfigDto: {
+                type: "object",
+                required: ["name", "apiKey"],
+                properties: {
+                    name: { type: "string", minLength: 1, maxLength: 100 },
+                    isActive: { type: "boolean" },
+                    activeProvider: { type: "string", minLength: 1, maxLength: 100 },
+                    apiKey: { type: "string", minLength: 1, maxLength: 500 },
+                    model: { type: "string", maxLength: 200 },
+                },
+            },
+            UpdateEmbeddingConfigDto: {
                 type: "object",
                 properties: {
                     name: { type: "string", minLength: 1, maxLength: 100 },

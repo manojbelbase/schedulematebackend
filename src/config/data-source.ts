@@ -6,7 +6,9 @@ import { PasswordReset } from "../modules/passwordReset/passwordReset.entity";
 import { CalendarConnection } from "../modules/calendarConnection/calendarConnection.entity";
 import { ChatConversation } from "../modules/chat/chat-conversation.entity";
 import { ChatMessage } from "../modules/chat/chat-message.entity";
+import { ChatMemory } from "../modules/chat/chat-memory.entity";
 import { LlmConfig } from "../modules/backoffice/llmConfig/llmConfig.entity";
+import { EmbeddingConfig } from "../modules/backoffice/embeddingConfig/embeddingConfig.entity";
 import { AccessRequest } from "../modules/accessRequest/accessRequest.entity";
 
 export const AppDataSource = new DataSource({
@@ -14,7 +16,7 @@ export const AppDataSource = new DataSource({
     url: env.databaseUrl,
     synchronize: false,
     logging: !env.isProduction,
-    entities: [User, PasswordReset, CalendarConnection, ChatConversation, ChatMessage, LlmConfig, AccessRequest],
+    entities: [User, PasswordReset, CalendarConnection, ChatConversation, ChatMessage, ChatMemory, LlmConfig, EmbeddingConfig, AccessRequest],
     migrations: [import.meta.dirname + "/../database/migrations/*.{ts,js}"],
     migrationsTableName: "migrations",
 });
