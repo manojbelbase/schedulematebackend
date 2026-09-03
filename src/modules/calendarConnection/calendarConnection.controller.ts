@@ -43,25 +43,25 @@ export async function connectCallbackController(req: Request, res: Response): Pr
         const { code, state } = req.query as { code?: string; state?: string };
 
         if (!code || typeof state !== "string") {
-            res.redirect(`${env.frontendUrl}/settings?error=invalid_request`);
+            res.redirect(`${env.frontendUrl}/?error=invalid_request`);
             return;
         }
 
         let userId: string;
-        let redirectPath = "/settings";
+        let redirectPath = "/";
         try {
             const decoded = jwt.verify(state, env.jwtSecret) as JwtPayload & {
                 sub?: string;
                 t?: string;
             };
             if (!decoded.sub) {
-                res.redirect(`${env.frontendUrl}/settings?error=invalid_state`);
+                res.redirect(`${env.frontendUrl}/?error=invalid_state`);
                 return;
             }
             userId = decoded.sub;
-            redirectPath = safeRedirectPath(decoded.t) || "/settings";
+            redirectPath = safeRedirectPath(decoded.t) || "/";
         } catch {
-            res.redirect(`${env.frontendUrl}/settings?error=invalid_state`);
+            res.redirect(`${env.frontendUrl}/?error=invalid_state`);
             return;
         }
 
@@ -70,7 +70,7 @@ export async function connectCallbackController(req: Request, res: Response): Pr
 
         res.redirect(`${env.frontendUrl}${redirectPath}?google=connected`);
     } catch {
-        res.redirect(`${env.frontendUrl}/settings?error=google_connection_failed`);
+        res.redirect(`${env.frontendUrl}/?error=google_connection_failed`);
     }
 }
 

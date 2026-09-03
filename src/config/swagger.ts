@@ -378,7 +378,7 @@ export const swaggerConfig: JsonObject = {
                         name: "redirect",
                         in: "query",
                         required: false,
-                        schema: { type: "string", default: "/settings" },
+                        schema: { type: "string", default: "/" },
                         description: "Path to return to after connecting",
                     },
                 ],
