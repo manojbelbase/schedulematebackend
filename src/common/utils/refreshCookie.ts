@@ -7,8 +7,13 @@ export const REFRESH_TOKEN_COOKIE_NAME = env.refreshCookieName;
 function cookieDefaults() {
     return {
         httpOnly: true,
-        sameSite: "lax" as const,
-        secure: true,
+        // Local dev runs over plain HTTP on localhost (same-site), where
+        // `Secure` cookies are discarded and `SameSite=None` is invalid.
+        // Production is HTTPS and cross-site (frontend and API on separate
+        // hosts), so it needs `SameSite=None` + `Secure` for the refresh
+        // cookie to be sent on refresh requests.
+        sameSite: env.isProduction ? ("none" as const) : ("lax" as const),
+        secure: env.isProduction,
         path: "/",
     };
 }
