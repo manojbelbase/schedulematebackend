@@ -60,14 +60,22 @@ export async function getLlmClient(provider: LlmProvider): Promise<OpenAI> {
         );
     }
 
-    if (!clients[provider]) {
-        clients[provider] = new OpenAI({
-            apiKey,
-            baseURL: baseUrl,
-            defaultHeaders: buildDefaultHeaders(provider),
-        });
+    const existing = clients[provider];
+    if (existing) {
+        const cachedKey = (existing as unknown as { apiKey?: string }).apiKey;
+        if (cachedKey === apiKey) {
+            return existing;
+        }
+        delete clients[provider];
     }
-    return clients[provider];
+
+    const client = new OpenAI({
+        apiKey,
+        baseURL: baseUrl,
+        defaultHeaders: buildDefaultHeaders(provider),
+    });
+    clients[provider] = client;
+    return client;
 }
 
 export async function getModelForProvider(provider: LlmProvider): Promise<string> {

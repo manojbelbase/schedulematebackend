@@ -17,7 +17,14 @@ async function bootstrap(): Promise<void> {
 
         const shutdown = async (signal: string): Promise<void> => {
             logger.info(`${signal} received, shutting down gracefully...`);
+            const forceExit = setTimeout(() => {
+                logger.warn("Graceful shutdown timed out; forcing exit.");
+                process.exit(1);
+            }, 10_000);
+            forceExit.unref();
+
             server.close(async () => {
+                clearTimeout(forceExit);
                 logger.info("HTTP server closed");
                 process.exit(0);
             });

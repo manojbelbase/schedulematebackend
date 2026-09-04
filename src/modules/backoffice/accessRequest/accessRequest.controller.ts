@@ -30,7 +30,7 @@ function toPublicRequest(request: {
     };
 }
 
-export async function listAccessRequestsController(req: Request, res: Response) {
+export async function listAccessRequestsController(req: Request, res: Response): Promise<void> {
     const query = parseListQuery(req.query);
     const result = await listCalendarAccessRequestsService(query);
     const publicRequests = result.items.map(toPublicRequest);
@@ -43,7 +43,7 @@ export async function listAccessRequestsController(req: Request, res: Response) 
     );
 }
 
-export async function updateAccessRequestStatusController(req: Request, res: Response) {
+export async function updateAccessRequestStatusController(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const status = (req.body as { status: string }).status as AccessRequestStatus;
     const updated = await updateAccessRequestStatusService(id as string, status);

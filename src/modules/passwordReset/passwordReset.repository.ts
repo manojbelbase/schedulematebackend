@@ -36,3 +36,7 @@ export async function findPendingResetByUser(
 export async function markResetUsed(id: string): Promise<void> {
     await passwordResetRepository.update({ id }, { used: true });
 }
+
+export async function deletePasswordResetsForUser(userId: string): Promise<void> {
+    await passwordResetRepository.delete({ userId });
+}

@@ -15,6 +15,12 @@ import {
 import type { CreateEmbeddingConfigDto } from "./dto/create-embedding-config.dto";
 import type { UpdateEmbeddingConfigDto } from "./dto/update-embedding-config.dto";
 
+function maskApiKey(apiKey: string): string {
+    if (!apiKey) return "";
+    if (apiKey.length <= 8) return "****";
+    return `${apiKey.slice(0, 4)}****${apiKey.slice(-4)}`;
+}
+
 export type PublicEmbeddingConfig = {
     id: string;
     name: string;
@@ -41,7 +47,7 @@ function toPublic(config: {
         name: config.name,
         isActive: config.isActive,
         activeProvider: config.activeProvider,
-        apiKey: config.apiKey,
+        apiKey: maskApiKey(config.apiKey),
         model: config.model,
         baseUrl: config.baseUrl,
         dimension: config.dimension,

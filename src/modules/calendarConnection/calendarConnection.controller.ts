@@ -4,6 +4,7 @@ import { env } from "../../config/env";
 import { AppError } from "../../common/errors/AppError";
 import { httpStatus } from "../../constants/httpStatus";
 import { sendSuccess } from "../../lib/response";
+import { safeRedirectPath } from "../../common/utils/redirect";
 import { buildGoogleConnectAuthUrl, getGoogleCredentials } from "../../config/googleOAuth";
 import {
     disconnectConnection,
@@ -11,11 +12,11 @@ import {
     saveConnectionCredentials,
 } from "./calendarConnection.service";
 
-function safeRedirectPath(value: unknown): string {
-    if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
-        return "/";
+function getStateSecret(): string {
+    if (!env.jwtStateSecret) {
+        throw new AppError("OAuth state secret is not configured", httpStatus.INTERNAL_SERVER_ERROR);
     }
-    return value;
+    return env.jwtStateSecret;
 }
 
 export async function getConnectionStatusController(req: Request, res: Response): Promise<void> {
@@ -31,7 +32,7 @@ export async function connectController(req: Request, res: Response): Promise<vo
         throw new AppError("Not authenticated", httpStatus.UNAUTHORIZED);
     }
     const redirectPath = safeRedirectPath(req.query.redirect);
-    const state = jwt.sign({ sub: req.user.userId, t: redirectPath }, env.jwtSecret, {
+    const state = jwt.sign({ sub: req.user.userId, t: redirectPath }, getStateSecret(), {
         expiresIn: "10m",
     });
     const connectUrl = buildGoogleConnectAuthUrl(state, env.googleConnectRedirectUri);
@@ -50,7 +51,7 @@ export async function connectCallbackController(req: Request, res: Response): Pr
         let userId: string;
         let redirectPath = "/";
         try {
-            const decoded = jwt.verify(state, env.jwtSecret) as JwtPayload & {
+            const decoded = jwt.verify(state, getStateSecret()) as JwtPayload & {
                 sub?: string;
                 t?: string;
             };

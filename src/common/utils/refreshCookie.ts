@@ -7,7 +7,7 @@ export const REFRESH_TOKEN_COOKIE_NAME = env.refreshCookieName;
 function cookieDefaults() {
     return {
         httpOnly: true,
-        sameSite: "none" as const,
+        sameSite: "lax" as const,
         secure: true,
         path: "/",
     };
@@ -47,10 +47,14 @@ export function clearAccessTokenCookie(res: Response): void {
 export function setRefreshTokenCookie(res: Response, token: string): void {
     res.cookie(REFRESH_TOKEN_COOKIE_NAME, token, {
         ...cookieDefaults(),
+        path: "/api/auth",
         maxAge: maxAgeRefreshMs(),
     });
 }
 
 export function clearRefreshTokenCookie(res: Response): void {
-    res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, cookieDefaults());
+    res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, {
+        ...cookieDefaults(),
+        path: "/api/auth",
+    });
 }

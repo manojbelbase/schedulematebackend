@@ -1,5 +1,6 @@
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
 import express, { type Express } from "express";
 import { env } from "./config/env";
 import { swaggerConfig } from "./config/swagger";
@@ -19,9 +20,10 @@ import { llmConfigRouter } from "./modules/backoffice/llmConfig/llmConfig.routes
 export function createApp(): Express {
     const app = express();
 
+    app.use(helmet());
     app.use(cors({ origin: env.corsOrigins, credentials: true }));
     app.use(cookieParser());
-    app.use(express.json());
+    app.use(express.json({ limit: "1mb" }));
 
     app.get("/docs-json", docsAuth, (_req, res) => {
         res.json(swaggerConfig);

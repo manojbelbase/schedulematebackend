@@ -1,9 +1,12 @@
+import { In } from "typeorm";
 import { AppDataSource } from "../../config/data-source";
 import { ChatConversation } from "./chat-conversation.entity";
 import { ChatMessage } from "./chat-message.entity";
+import { ChatMemory } from "./chat-memory.entity";
 
 const conversationRepository = AppDataSource.getRepository(ChatConversation);
 const messageRepository = AppDataSource.getRepository(ChatMessage);
+const memoryRepository = AppDataSource.getRepository(ChatMemory);
 
 export async function createConversation(
     userId: string,
@@ -31,7 +34,16 @@ export async function findConversationForUser(
 }
 
 export async function deleteConversation(id: string): Promise<void> {
+    await messageRepository.delete({ conversationId: id });
+    await memoryRepository.delete({ conversationId: id });
     await conversationRepository.delete(id);
+}
+
+export async function deleteUserChatData(userId: string): Promise<void> {
+    const conversations = await conversationRepository.find({ where: { userId } });
+    await messageRepository.delete({ conversationId: In(conversations.map((c) => c.id)) });
+    await memoryRepository.delete({ userId });
+    await conversationRepository.delete({ userId });
 }
 
 export async function addMessage(data: {

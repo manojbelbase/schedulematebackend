@@ -1,5 +1,6 @@
 import { AppError } from "../../common/errors/AppError";
 import { httpStatus } from "../../constants/httpStatus";
+import { env } from "../../config/env";
 import {
     addMessage,
     createConversation,
@@ -121,11 +122,6 @@ export async function sendChatMessage(
                 code: "USER_QUOTA_EXCEEDED",
                 upgradeInfo: {
                     message: "Upgrade your plan to continue using ScheduleGPT.",
-                    contact: {
-                        email: "manoj.blacktech@gmail.com",
-                        phone: "+977 9864415071",
-                        portfolio: "www.manojbelbase.com.np",
-                    },
                 },
             }
         );
@@ -133,9 +129,11 @@ export async function sendChatMessage(
 
     const userMessage = await addMessage({ conversationId, role: "user", content });
 
-    extractAndStoreMemory(userId, conversationId, content).catch(() => {
-        // Silently fail - memory extraction should not block chat
-    });
+    if (env.memoryExtractionEnabled) {
+        extractAndStoreMemory(userId, conversationId, content).catch(() => {
+            // Silently fail - memory extraction should not block chat
+        });
+    }
 
     const recentMessages = (
         await listRecentMessagesByConversation(conversationId, 10)

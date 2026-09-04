@@ -1,6 +1,8 @@
 import { AppError } from "../../../common/errors/AppError";
 import { httpStatus } from "../../../constants/httpStatus";
 import { listUsers, createUser, findByEmail, deleteUser, findUserById, updateUserLimit } from "../../users/user.repository";
+import { deleteUserChatData } from "../../chat/chat.repository";
+import { deletePasswordResetsForUser } from "../../passwordReset/passwordReset.repository";
 import { buildPagination } from "../../../common/utils/pagination";
 import type { ListQueryOptions } from "../../../common/utils/pagination";
 import type { UserRole } from "../../users/user.entity";
@@ -26,6 +28,10 @@ export async function deleteUserService(id: string): Promise<void> {
     if (!deleted) {
         throw new AppError("User not found", httpStatus.NOT_FOUND);
     }
+    await Promise.all([
+        deleteUserChatData(id),
+        deletePasswordResetsForUser(id),
+    ]);
 }
 
 export async function updateUserLimitService(

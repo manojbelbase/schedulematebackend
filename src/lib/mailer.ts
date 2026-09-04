@@ -25,7 +25,11 @@ function getTransporter(): nodemailer.Transporter | null {
 export async function sendOtpEmail(to: string, otp: string, ttlMinutes: number): Promise<void> {
     const t = getTransporter();
     if (!t) {
-        logger.warn("SMTP not configured; OTP email not sent. OTP for %s: %s", to, otp);
+        if (!env.isProduction) {
+            logger.warn("SMTP not configured; OTP email not sent. OTP for %s: %s", to, otp);
+        } else {
+            logger.warn("SMTP not configured; OTP email would not be sent to %s in production.", to);
+        }
         return;
     }
 

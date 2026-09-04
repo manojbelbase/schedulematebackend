@@ -7,7 +7,7 @@ import { UserRole } from "../../users/user.entity";
 import type { AddUserDto } from "./dto/add-user.dto";
 import type { UpdateUserLimitDto } from "./dto/update-user-limit.dto";
 
-export async function listUsersController(req: Request, res: Response) {
+export async function listUsersController(req: Request, res: Response): Promise<void> {
     const query = parseListQuery(req.query);
 
     let role: UserRole | undefined;
@@ -33,7 +33,7 @@ export async function listUsersController(req: Request, res: Response) {
     sendSuccess(res, httpStatus.OK, "Users fetched successfully", publicUsers, result.pagination);
 }
 
-export async function addUserController(req: Request, res: Response) {
+export async function addUserController(req: Request, res: Response): Promise<void> {
     const { email, name } = req.body as AddUserDto;
     const user = await addUserService(email, name);
 
@@ -49,14 +49,14 @@ export async function addUserController(req: Request, res: Response) {
     });
 }
 
-export async function deleteUserController(req: Request, res: Response) {
+export async function deleteUserController(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     await deleteUserService(id as string);
 
     sendSuccess(res, httpStatus.OK, "User deleted successfully");
 }
 
-export async function updateUserLimitController(req: Request, res: Response) {
+export async function updateUserLimitController(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const data = req.body as UpdateUserLimitDto;
     const update: { apiRequestLimit?: number; resetUsed?: boolean } = {};

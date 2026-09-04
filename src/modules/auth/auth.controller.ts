@@ -5,6 +5,7 @@ import { buildGoogleAuthUrl, verifyGoogleCode } from "../../config/googleOAuth";
 import { AppError } from "../../common/errors/AppError";
 import { httpStatus } from "../../constants/httpStatus";
 import { sendSuccess } from "../../lib/response";
+import { safeRedirectPath } from "../../common/utils/redirect";
 import {
     clearAccessTokenCookie,
     clearRefreshTokenCookie,
@@ -16,19 +17,16 @@ import { findUserById } from "../users/user.repository";
 import type { RegisterUserDto } from "./dto/register-user.dto";
 import type { LoginUserDto } from "./dto/login-user.dto";
 
-function safeRedirectPath(value: unknown): string {
-    if (typeof value !== "string" || !value.startsWith("/")) {
-        return "/";
+function getStateSecret(): string {
+    if (!env.jwtStateSecret) {
+        throw new AppError("OAuth state secret is not configured", httpStatus.INTERNAL_SERVER_ERROR);
     }
-    if (value.startsWith("//")) {
-        return "/";
-    }
-    return value;
+    return env.jwtStateSecret;
 }
 
 export async function googleAuthController(req: Request, res: Response): Promise<void> {
     const redirectPath = safeRedirectPath(req.query.redirect);
-    const state = jwt.sign({ t: redirectPath }, env.jwtSecret, { expiresIn: "10m" });
+    const state = jwt.sign({ t: redirectPath }, getStateSecret(), { expiresIn: "10m" });
     res.redirect(buildGoogleAuthUrl(state, env.googleRedirectUri));
 }
 
@@ -43,7 +41,7 @@ export async function googleCallbackController(req: Request, res: Response): Pro
 
         let redirectPath = "/";
         try {
-            const decoded = jwt.verify(state, env.jwtSecret) as JwtPayload & { t?: string };
+            const decoded = jwt.verify(state, getStateSecret()) as JwtPayload & { t?: string };
             redirectPath = safeRedirectPath(decoded.t);
         } catch {
             res.redirect(`${env.frontendUrl}/auth/login?error=invalid_state`);
@@ -58,8 +56,6 @@ export async function googleCallbackController(req: Request, res: Response): Pro
         setRefreshTokenCookie(res, refreshToken);
 
         const target = new URL(`${env.frontendUrl}/api/auth/google`);
-        target.searchParams.set("token", accessToken);
-        target.searchParams.set("refresh", refreshToken);
         target.searchParams.set("redirect", redirectPath);
         res.redirect(target.toString());
     } catch (error) {

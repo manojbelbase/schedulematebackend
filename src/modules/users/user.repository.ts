@@ -4,6 +4,8 @@ import type { ListQueryOptions } from "../../common/utils/pagination";
 
 const userRepository = AppDataSource.getRepository(User);
 
+const ALLOWED_SORT_COLUMNS = ["email", "name", "username", "role", "createdAt", "updatedAt"];
+
 export async function findByEmail(email: string): Promise<User | null> {
     return await userRepository.findOne({
         where: { email },
@@ -130,7 +132,8 @@ export async function listUsers(query: ListQueryOptions, role?: UserRole): Promi
 
     const total = await qb.getCount();
 
-    qb.orderBy(`user.${query.sortBy}`, query.sortOrder);
+    const sortBy = ALLOWED_SORT_COLUMNS.includes(query.sortBy) ? query.sortBy : "createdAt";
+    qb.orderBy(`user.${sortBy}`, query.sortOrder);
     qb.skip(query.page * query.take).take(query.take);
 
     const items = await qb.getMany();

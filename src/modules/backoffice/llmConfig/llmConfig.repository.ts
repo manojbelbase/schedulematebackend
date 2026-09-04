@@ -66,7 +66,12 @@ export async function updateConfig(id: string, data: Partial<LlmConfig>): Promis
     if (!config) throw new AppError("LLM config not found", httpStatus.NOT_FOUND);
 
     if (data.isActive) await deactivateConfigs();
-    Object.assign(config, data);
+    if (data.name !== undefined) config.name = data.name;
+    if (data.isActive !== undefined) config.isActive = data.isActive;
+    if (data.activeProvider !== undefined) config.activeProvider = data.activeProvider;
+    if (data.apiKey !== undefined) config.apiKey = data.apiKey;
+    if (data.model !== undefined) config.model = data.model;
+    if (data.baseUrl !== undefined) config.baseUrl = data.baseUrl;
     return await llmConfigRepository.save(config);
 }
 

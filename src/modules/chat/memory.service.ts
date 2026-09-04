@@ -28,7 +28,7 @@ export type ChatMemory = {
 
 //  Uses an LLM to determine if a user message contains information worth remembering.
 
-async function extractMemoryDecision(content: string): Promise<MemoryExtractionResult> {
+async function extractMemoryDecision(userId: string, content: string): Promise<MemoryExtractionResult> {
     try {
         const systemPrompt = `You are a memory extraction assistant. Analyze the given user message and determine if it contains useful long-term information that should be remembered.
 
@@ -48,7 +48,7 @@ Guidelines:
 - Keep memories concise and clear`;
 
         const response = await runAgentTurn(
-            "system",
+            userId,
             [{ role: "user", content }],
             { systemPromptOverride: systemPrompt }
         );
@@ -92,7 +92,7 @@ export async function extractAndStoreMemory(
 ): Promise<void> {
     try {
         // Determine if this message should be remembered
-        const extractionResult = await extractMemoryDecision(content);
+        const extractionResult = await extractMemoryDecision(userId, content);
 
         if (!extractionResult.shouldRemember || !extractionResult.memory) {
             logger.debug({ userId, extractionResult }, "Message not worth remembering");

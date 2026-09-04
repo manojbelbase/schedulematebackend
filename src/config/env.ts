@@ -17,6 +17,7 @@ export const env = {
     logLevel: process.env.LOG_LEVEL ?? 'info',
     databaseUrl: checkRequiredEnvVariable('DATABASE_URL'),
     jwtSecret: checkRequiredEnvVariable('JWT_SECRET'),
+    jwtStateSecret: process.env.JWT_STATE_SECRET ?? '',
     jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '7d',
     jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '14d',
     accessTokenCookieName: 'schedulegpt-token',
@@ -43,4 +44,5 @@ export const env = {
     backofficeEmail: process.env.BACKOFFICE_EMAIL ?? '',
     backofficePassword: process.env.BACKOFFICE_PASSWORD ?? '',
     backofficeName: process.env.BACKOFFICE_NAME ?? 'Backoffice Admin',
+    memoryExtractionEnabled: (process.env.MEMORY_EXTRACTION_ENABLED ?? 'true') === 'true',
 } as const;

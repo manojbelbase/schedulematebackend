@@ -1,4 +1,4 @@
-import { formatNow } from "../../common/utils/timezone";
+import { formatNow, isValidTimeZone } from "../../common/utils/timezone";
 import type { MemoryItem } from "./agent.service";
 
 const BASE_PROMPT = `
@@ -35,15 +35,6 @@ HARD TRUTH RULES (never break these):
 - NEVER invent an event id, a confirmation, or a success message for an action the tools did not perform.
 - If the calendar is not connected (see context below), any calendar action is impossible. Do not call calendar tools; instead, ask the user to connect their Google Calendar from the sidebar.
 `.trim();
-
-function isValidTimeZone(timeZone: string): boolean {
-    try {
-        new Intl.DateTimeFormat("en-US", { timeZone });
-        return true;
-    } catch {
-        return false;
-    }
-}
 
 type SystemPromptOptions = {
     calendarConnected: boolean;
