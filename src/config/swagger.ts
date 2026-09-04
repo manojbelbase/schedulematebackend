@@ -3,7 +3,7 @@ import type { JsonObject } from "swagger-ui-express";
 /**
  * OpenAPI 3.0 document served at GET /docs-json.
  *
- * This spec is the single source of truth for the `scheduledmatefrontend`
+ * This spec is the single source of truth for the `schedulegptfrontend`
  * monorepo: `pnpm generate-types` runs `@openapi-codegen/typescript` against
  * `${API_BASE_URL}/docs-json` and produces the typed React Query clients in
  * `packages/services/src/{web,backoffice,website}`.
@@ -20,10 +20,10 @@ import type { JsonObject } from "swagger-ui-express";
 export const swaggerConfig: JsonObject = {
     openapi: "3.0.0",
     info: {
-        title: "ScheduledMate API",
+        title: "ScheduleGPT API",
         version: "1.0.0",
         description:
-            "Express + TypeORM API for ScheduledMate. This OpenAPI spec is consumed by `scheduledmatefrontend` openapi-codegen to auto-generate typed clients for the web, backoffice and website apps.",
+            "Express + TypeORM API for ScheduleGPT. This OpenAPI spec is consumed by `schedulegptfrontend` openapi-codegen to auto-generate typed clients for the web, backoffice and website apps.",
     },
     servers: [
         {

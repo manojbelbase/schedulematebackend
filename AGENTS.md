@@ -1,8 +1,8 @@
-# AGENTS.md — ScheduledMate API Project Conventions
+# AGENTS.md — ScheduleGPT API Project Conventions
 
 This file describes the architecture, folder structure, and coding conventions of this Express + TypeORM API. Follow these patterns when adding or modifying code.
 
-The single most important contract in this repo: **the OpenAPI spec served at `GET /docs-json` is the source of truth for the frontend.** The `scheduledmatefrontend` monorepo runs `openapi-codegen` against this endpoint to auto-generate typed API clients (`packages/services/src/{web,backoffice,website}`). When you add/change a route, you MUST update `src/config/swagger.ts` so the frontend can regenerate types with `pnpm generate-types`.
+The single most important contract in this repo: **the OpenAPI spec served at `GET /docs-json` is the source of truth for the frontend.** The `schedulegptfrontend` monorepo runs `openapi-codegen` against this endpoint to auto-generate typed API clients (`packages/services/src/{web,backoffice,website}`). When you add/change a route, you MUST update `src/config/swagger.ts` so the frontend can regenerate types with `pnpm generate-types`.
 
 ## Tech Stack
 
@@ -78,7 +78,7 @@ Scope is intentionally small: only `health` + `auth` (+ `docs`). No roles, banne
 
 ## OpenAPI / Frontend Codegen — CRITICAL
 
-- The frontend fetches `${API_BASE_URL}/docs-json` with `Authorization: Basic ${DOCS_AUTH_TOKEN}` (see `scheduledmatefrontend/openapi-codegen.config.ts`). Three apps (web, backoffice, website) point at this backend, so `pnpm generate-types` regenerates each app's typed client from this one spec.
+- The frontend fetches `${API_BASE_URL}/docs-json` with `Authorization: Basic ${DOCS_AUTH_TOKEN}` (see `schedulegptfrontend/openapi-codegen.config.ts`). Three apps (web, backoffice, website) point at this backend, so `pnpm generate-types` regenerates each app's typed client from this one spec.
 - `app.ts` mounts:
   - `GET /docs-json` — raw OpenAPI JSON (behind `docsAuth`)
   - `GET /api-docs` — swagger UI (behind `docsAuth`)
@@ -163,9 +163,9 @@ Wire-up pattern:
 
 ## Database
 
-- Postgres via Docker: container `schedulemate-postgres`, db `schedulemate`, host-port 5434.
-- `DATABASE_URL="postgresql://postgres:postgres@localhost:5434/schedulemate"`.
-- Inspect data: `docker compose exec -T postgres psql -U postgres -d schedulemate -c "<sql>"`.
+- Postgres via Docker: container `schedulegpt-postgres`, db `schedulegpt`, host-port 5434.
+- `DATABASE_URL="postgresql://postgres:postgres@localhost:5434/schedulegpt"`.
+- Inspect data: `docker compose exec -T postgres psql -U postgres -d schedulegpt -c "<sql>"`.
 - Migrate: `pnpm db:migrate`. If a DB column doesn't match the entity, add a new migration to align (never drop user data on prod).
 
 ## Boot flow

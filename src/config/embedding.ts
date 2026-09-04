@@ -19,7 +19,7 @@ function buildDefaultHeaders(provider: string): Record<string, string> {
     if (entry?.requiresReferer) {
         return {
             "HTTP-Referer": env.frontendUrl,
-            "X-Title": "ScheduledMate",
+            "X-Title": "ScheduleGPT",
         };
     }
     return {};

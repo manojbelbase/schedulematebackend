@@ -36,7 +36,7 @@ export type AgentTurnOptions = {
     timezone?: string | undefined;
     memories?: MemoryItem[] | undefined;
     /**
-     * When provided, replaces the default ScheduledMate system prompt entirely.
+     * When provided, replaces the default ScheduleGPT system prompt entirely.
      * Used for internal LLM sub-tasks such as memory extraction, where we want
      * the model to follow custom instructions (e.g. return strict JSON).
      */

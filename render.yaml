@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: schedulemate-backend
+    name: schedulegpt-backend
     runtime: node
     plan: free
     buildCommand: pnpm install --frozen-lockfile && pnpm build

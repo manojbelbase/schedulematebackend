@@ -1,6 +1,6 @@
-# ScheduledMate Backend
+# ScheduleGPT Backend
 
-Express 5 + TypeORM API for ScheduledMate. It feeds `scheduledmatefrontend` via OpenAPI codegen: every route in `src/config/swagger.ts` becomes a typed React Query client in the frontend automatically.
+Express 5 + TypeORM API for ScheduleGPT. It feeds `schedulegptfrontend` via OpenAPI codegen: every route in `src/config/swagger.ts` becomes a typed React Query client in the frontend automatically.
 
 ## Prerequisites
 
@@ -24,7 +24,7 @@ pnpm dev            # API on :8000
 - The frontend regenerates its typed clients with:
 
 ```sh
-cd ../scheduledmatefrontend
+cd ../schedulegptfrontend
 pnpm generate-types
 ```
 

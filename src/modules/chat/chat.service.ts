@@ -120,7 +120,7 @@ export async function sendChatMessage(
             {
                 code: "USER_QUOTA_EXCEEDED",
                 upgradeInfo: {
-                    message: "Upgrade your plan to continue using ScheduledMate.",
+                    message: "Upgrade your plan to continue using ScheduleGPT.",
                     contact: {
                         email: "manoj.blacktech@gmail.com",
                         phone: "+977 9864415071",
