@@ -56,6 +56,8 @@ export async function googleCallbackController(req: Request, res: Response): Pro
         setRefreshTokenCookie(res, refreshToken);
 
         const target = new URL(`${env.frontendUrl}/api/auth/google`);
+        target.searchParams.set("token", accessToken);
+        target.searchParams.set("refresh", refreshToken);
         target.searchParams.set("redirect", redirectPath);
         res.redirect(target.toString());
     } catch (error) {
