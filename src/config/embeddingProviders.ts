@@ -16,6 +16,8 @@ export const EMBEDDING_PROVIDER_REGISTRY: EmbeddingProviderRegistryEntry[] = [
         defaultModel: "openai/text-embedding-3-small",
         models: [
             "openai/text-embedding-3-small",
+            "openai/text-embedding-3-large",
+            "google/gemini-embedding-2-preview",
             "qwen/qwen3-embedding-8b",
             "google/gemini-embedding-2"
         ],

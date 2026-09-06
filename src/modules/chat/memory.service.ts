@@ -7,13 +7,10 @@ import {
     findSimilarMemoryForDeduplication,
 } from "./memory.repository";
 import { runAgentTurn } from "./agent.service";
-import type { MemoryItem } from "./agent.service";
-import type { MemoryType } from "./chat-memory.entity";
 
 export type MemoryExtractionResult = {
     shouldRemember: boolean;
     memory?: string | undefined;
-    memoryType?: MemoryType | undefined;
 };
 
 export type ChatMemory = {
@@ -21,12 +18,9 @@ export type ChatMemory = {
     userId: string;
     conversationId: string;
     content: string;
-    memoryType: MemoryType;
     similarityScore?: number;
 };
 
-
-//  Uses an LLM to determine if a user message contains information worth remembering.
 
 async function extractMemoryDecision(userId: string, content: string): Promise<MemoryExtractionResult> {
     try {
@@ -35,16 +29,15 @@ async function extractMemoryDecision(userId: string, content: string): Promise<M
 Respond with JSON:
 {
   "shouldRemember": boolean,
-  "memory": "string (only if shouldRemember is true)",
-  "memoryType": "preference|fact|instruction|other (only if shouldRemember is true)"
+  "memory": "string (only if shouldRemember is true)"
 }
 
 Guidelines:
 - Greetings, acknowledgments, or pleasantries should NOT be remembered
-- User preferences (e.g., "I prefer meetings after 2 PM") should be remembered as "preference"
-- Factual information (e.g., "My timezone is Asia/Kathmandu") should be remembered as "fact"
-- Instructions or rules (e.g., "Don't schedule meetings on Saturday") should be remembered as "instruction"
-- Other valuable context should be remembered as "other"
+- User preferences (e.g., "I prefer meetings after 2 PM") should be remembered
+- Factual information (e.g., "My timezone is Asia/Kathmandu") should be remembered
+- Instructions or rules (e.g., "Don't schedule meetings on Saturday") should be remembered
+- Other valuable context should be remembered
 - Keep memories concise and clear`;
 
         const response = await runAgentTurn(
@@ -70,13 +63,14 @@ Guidelines:
         const result = parsed as Partial<MemoryExtractionResult>;
 
         if (!result.shouldRemember) {
+            logger.info({ userId, parsed }, "LLM decided message is NOT memorable");
             return { shouldRemember: false };
         }
 
+        logger.info({ userId, memoryPreview: result.memory?.slice(0, 100) }, "LLM decided message IS memorable");
         return {
             shouldRemember: true,
             memory: result.memory ?? undefined,
-            memoryType: result.memoryType ?? "other",
         };
     } catch (err) {
         logger.warn({ err }, "Memory extraction failed, treating as non-memorable");
@@ -91,18 +85,20 @@ export async function extractAndStoreMemory(
     content: string
 ): Promise<void> {
     try {
-        // Determine if this message should be remembered
+        logger.info({ userId, conversationId, contentPreview: content.slice(0, 80) }, "Memory extraction started");
+
         const extractionResult = await extractMemoryDecision(userId, content);
+        logger.info({ userId, shouldRemember: extractionResult.shouldRemember }, "Memory extraction decision");
 
         if (!extractionResult.shouldRemember || !extractionResult.memory) {
-            logger.debug({ userId, extractionResult }, "Message not worth remembering");
+            logger.debug({ userId }, "Message not worth remembering");
             return;
         }
 
-        //Generate embedding for the memory
         let embedding: number[];
         try {
             embedding = await generateEmbedding(extractionResult.memory);
+            logger.info({ userId, embeddingLength: embedding.length }, "Embedding generated");
         } catch (embeddingErr) {
             logger.warn(
                 { userId, embeddingErr },
@@ -111,7 +107,6 @@ export async function extractAndStoreMemory(
             return;
         }
 
-        // Check for duplicate memories (avoid storing same information multiple times)
         try {
             const duplicateMemory = await findSimilarMemoryForDeduplication(userId, embedding, 0.95);
             if (duplicateMemory) {
@@ -125,17 +120,15 @@ export async function extractAndStoreMemory(
             logger.warn({ dedupeErr }, "Deduplication check failed, proceeding with memory creation");
         }
 
-        // Step 4: Store the memory
-        await createMemory({
+        const stored = await createMemory({
             userId,
             conversationId,
             content: extractionResult.memory,
             embedding,
-            memoryType: extractionResult.memoryType ?? "other",
         });
 
         logger.info(
-            { userId, memoryType: extractionResult.memoryType },
+            { userId, memoryId: stored.id },
             "Memory stored successfully"
         );
     } catch (err) {
@@ -143,9 +136,6 @@ export async function extractAndStoreMemory(
     }
 }
 
-/**
- * Retrieves relevant memories for a user query using vector similarity search.
- */
 export async function retrieveRelevantMemories(
     userId: string,
     queryText: string,
@@ -153,7 +143,9 @@ export async function retrieveRelevantMemories(
 ): Promise<ChatMemory[]> {
     try {
         const queryEmbedding = await generateEmbedding(queryText);
-        const memories = await searchSimilarMemories(userId, queryEmbedding, limit, 0.7);
+        logger.info({ userId, queryTextPreview: queryText.slice(0, 80), embeddingLength: queryEmbedding.length }, "Memory retrieval started");
+        const memories = await searchSimilarMemories(userId, queryEmbedding, limit, 0.15);
+        logger.info({ userId, count: memories.length }, "Memory retrieval completed");
         return memories;
     } catch (err) {
         logger.warn(

@@ -3,7 +3,7 @@ import type {
     ChatCompletionMessageToolCall,
 } from "openai/resources/chat/completions";
 import { AppError } from "../../common/errors/AppError";
-import type { MemoryType } from "./chat-memory.entity";
+
 import {
     getLlmClient,
     getModelForProvider,
@@ -28,7 +28,6 @@ export type ChatTurn = {
 
 export type MemoryItem = {
     content: string;
-    memoryType: MemoryType;
 };
 
 export type AgentTurnOptions = {

@@ -1,6 +1,7 @@
 import { AppError } from "../../common/errors/AppError";
 import { httpStatus } from "../../constants/httpStatus";
 import { env } from "../../config/env";
+import { logger } from "../../lib/logger";
 import {
     addMessage,
     createConversation,
@@ -130,8 +131,8 @@ export async function sendChatMessage(
     const userMessage = await addMessage({ conversationId, role: "user", content });
 
     if (env.memoryExtractionEnabled) {
-        extractAndStoreMemory(userId, conversationId, content).catch(() => {
-            // Silently fail - memory extraction should not block chat
+        extractAndStoreMemory(userId, conversationId, content).catch((err) => {
+            logger.error({ err, userId, conversationId }, "Memory extraction failed silently");
         });
     }
 
@@ -144,7 +145,6 @@ export async function sendChatMessage(
         const rawMemories = await retrieveRelevantMemories(userId, content, 5);
         relevantMemories = rawMemories.map((m) => ({
             content: m.content,
-            memoryType: m.memoryType,
         }));
     } catch {
         // Memory retrieval failed - continue without it

@@ -52,38 +52,10 @@ export function buildSystemPrompt(options: SystemPromptOptions): string {
 
     let memoriesSection = "";
     if (options.memories && options.memories.length > 0) {
-        const memoriesByType = options.memories.reduce(
-            (acc, mem) => {
-                const type = mem.memoryType;
-                if (!acc[type]) {
-                    acc[type] = [];
-                }
-                const arr = acc[type];
-                if (arr) {
-                    arr.push(mem);
-                }
-                return acc;
-            },
-            {} as Record<string, MemoryItem[]>
-        );
-
-        memoriesSection = "\n\n# User Long-term Memories";
-
-        const typeLabels: Record<string, string> = {
-            preference: "Preferences",
-            fact: "Facts",
-            instruction: "Instructions/Rules",
-            other: "Other Information",
-        };
-
-        for (const [type, mems] of Object.entries(memoriesByType)) {
-            if (mems.length > 0) {
-                memoriesSection += `\n## ${typeLabels[type]}`;
-                mems.forEach((mem) => {
-                    memoriesSection += `\n- ${mem.content}`;
-                });
-            }
-        }
+        memoriesSection = "\n\n# User Long-term Memories\n";
+        options.memories.forEach((mem) => {
+            memoriesSection += `- ${mem.content}\n`;
+        });
     }
 
     return `

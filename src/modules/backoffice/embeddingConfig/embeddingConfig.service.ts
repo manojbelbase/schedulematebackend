@@ -74,10 +74,18 @@ export async function createEmbeddingConfigService(data: CreateEmbeddingConfigDt
         throw new AppError("Invalid embedding provider", httpStatus.BAD_REQUEST);
     }
 
+    const model = data.model || entry.defaultModel;
+    if (!entry.models.includes(model)) {
+        throw new AppError(
+            `Invalid model "${model}" for provider "${entry.label}". Valid models: ${entry.models.join(", ")}`,
+            httpStatus.BAD_REQUEST
+        );
+    }
+
     const payload: Partial<Record<string, string | boolean | number>> = {
         ...data,
         baseUrl: entry.baseUrl,
-        model: data.model || entry.defaultModel,
+        model,
         dimension: entry.dimension,
     };
     const created = await createConfig(payload);
@@ -89,6 +97,25 @@ export async function updateEmbeddingConfigService(
     id: string,
     data: UpdateEmbeddingConfigDto
 ): Promise<PublicEmbeddingConfig> {
+    if (data.model || data.activeProvider) {
+        const config = await findConfig(id);
+        if (!config) {
+            throw new AppError("Embedding config not found", httpStatus.NOT_FOUND);
+        }
+        const provider = data.activeProvider || config.activeProvider;
+        const entry = getEmbeddingProviderEntry(provider);
+        if (!entry) {
+            throw new AppError("Invalid embedding provider", httpStatus.BAD_REQUEST);
+        }
+        const model = data.model || config.model;
+        if (!entry.models.includes(model)) {
+            throw new AppError(
+                `Invalid model "${model}" for provider "${entry.label}". Valid models: ${entry.models.join(", ")}`,
+                httpStatus.BAD_REQUEST
+            );
+        }
+    }
+
     const updated = await updateConfig(id, data as Partial<Record<string, string | boolean | number>>);
     invalidateEmbeddingClients();
     return toPublic(updated);

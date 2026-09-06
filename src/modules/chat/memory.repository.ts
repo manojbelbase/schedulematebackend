@@ -1,21 +1,23 @@
 import { AppDataSource } from "../../config/data-source";
-import { ChatMemory, type MemoryType } from "./chat-memory.entity";
+import { ChatMemory } from "./chat-memory.entity";
 
 const memoryRepository = AppDataSource.getRepository(ChatMemory);
+
+function toPgVectorLiteral(embedding: number[]): string {
+    return `[${embedding.join(",")}]`;
+}
 
 export async function createMemory(data: {
     userId: string;
     conversationId: string;
     content: string;
     embedding: number[];
-    memoryType: "preference" | "fact" | "instruction" | "other";
 }): Promise<ChatMemory> {
     const memory = memoryRepository.create({
         userId: data.userId,
         conversationId: data.conversationId,
         content: data.content,
-        embedding: JSON.stringify(data.embedding),
-        memoryType: data.memoryType,
+        embedding: toPgVectorLiteral(data.embedding),
     });
     return await memoryRepository.save(memory);
 }
@@ -27,39 +29,28 @@ function similarMemoriesQuery(userId: string, queryEmbedding: number[], threshol
         .createQueryBuilder("memory")
         .select("memory.*")
         .addSelect(
-            "1 - (memory.embedding <-> :queryEmbedding::vector)",
+            "1 - (memory.embedding <=> :queryEmbedding::vector)",
             "similarity"
         )
         .where("memory.user_id = :userId", { userId })
         .andWhere(
-            "(memory.embedding <-> :queryEmbedding::vector) < :maxDistance",
+            "(memory.embedding <=> :queryEmbedding::vector) < :maxDistance",
             { maxDistance }
         )
-        .setParameters({ queryEmbedding: JSON.stringify(queryEmbedding) })
+        .setParameters({ queryEmbedding: toPgVectorLiteral(queryEmbedding) })
         .orderBy("similarity", "DESC");
 }
 
-function toMemory(row: {
-    memory_id: string;
-    memory_user_id: string;
-    memory_conversation_id: string;
-    memory_content: string;
-    memory_embedding: string;
-    memory_type: string;
-    memory_created_at: Date;
-    memory_updated_at: Date;
-    similarity: number;
-}): ChatMemory {
+function toMemory(row: Record<string, unknown>): ChatMemory {
     const memory = new ChatMemory();
-    memory.id = row.memory_id;
-    memory.userId = row.memory_user_id;
-    memory.conversationId = row.memory_conversation_id;
-    memory.content = row.memory_content;
-    memory.embedding = row.memory_embedding;
-    memory.memoryType = row.memory_type as MemoryType;
-    memory.similarityScore = row.similarity;
-    memory.createdAt = row.memory_created_at;
-    memory.updatedAt = row.memory_updated_at;
+    memory.id = (row.memory_id ?? row.id) as string;
+    memory.userId = (row.memory_user_id ?? row.user_id) as string;
+    memory.conversationId = (row.memory_conversation_id ?? row.conversation_id) as string;
+    memory.content = (row.memory_content ?? row.content) as string;
+    memory.embedding = (row.memory_embedding ?? row.embedding) as string;
+    memory.similarityScore = (row.similarity ?? row.memory_similarity_score) as number;
+    memory.createdAt = (row.memory_created_at ?? row.created_at) as Date;
+    memory.updatedAt = (row.memory_updated_at ?? row.updated_at) as Date;
     return memory;
 }
 
@@ -67,22 +58,11 @@ export async function searchSimilarMemories(
     userId: string,
     queryEmbedding: number[],
     limit: number = 5,
-    threshold: number = 0.7
+    threshold: number = 0.2
 ): Promise<ChatMemory[]> {
     const results = await similarMemoriesQuery(userId, queryEmbedding, threshold)
         .limit(limit)
-        .getRawMany() as Array<{
-            memory_id: string;
-            memory_user_id: string;
-            memory_conversation_id: string;
-            memory_content: string;
-            memory_embedding: string;
-            memory_type: string;
-            memory_similarity_score: number;
-            memory_created_at: Date;
-            memory_updated_at: Date;
-            similarity: number;
-        }>;
+        .getRawMany();
 
     return results.map(toMemory);
 }
@@ -94,17 +74,7 @@ export async function findSimilarMemoryForDeduplication(
 ): Promise<ChatMemory | null> {
     const result = await similarMemoriesQuery(userId, queryEmbedding, threshold)
         .limit(1)
-        .getRawOne() as {
-            memory_id: string;
-            memory_user_id: string;
-            memory_conversation_id: string;
-            memory_content: string;
-            memory_embedding: string;
-            memory_type: string;
-            memory_created_at: Date;
-            memory_updated_at: Date;
-            similarity: number;
-        } | undefined;
+        .getRawOne();
 
     if (!result) {
         return null;
