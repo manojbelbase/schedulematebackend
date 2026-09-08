@@ -1,0 +1,50 @@
+wing: work
+rooms:
+  - name: modules
+    description: Feature modules (auth, health, users, etc.)
+    keywords:
+      - modules
+      - auth
+      - health
+      - users
+      - routes
+      - controllers
+      - services
+  - name: common
+    description: Shared middleware, utils, entities, errors
+    keywords:
+      - common
+      - middleware
+      - utils
+      - entities
+      - errors
+  - name: config
+    description: App configuration (env, database, swagger, migrations)
+    keywords:
+      - config
+      - env
+      - database
+      - swagger
+      - migrations
+  - name: database
+    description: TypeORM migrations and data source
+    keywords:
+      - database
+      - migrations
+      - typeorm
+      - postgres
+  - name: lib
+    description: Core libraries (logger, response helpers)
+    keywords:
+      - lib
+      - logger
+      - response
+  - name: types
+    description: TypeScript type declarations and augmentations
+    keywords:
+      - types
+      - declarations
+      - augmentations
+  - name: general
+    description: Root files (server.ts, app.ts) and anything else
+    keywords: []
