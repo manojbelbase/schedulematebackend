@@ -60,7 +60,7 @@ ScheduleGPT is a full-stack AI scheduling assistant:
 ```
                           ┌─────────────────────┐
                           │   3 Frontend Apps    │
-                          │  (React + TypeScript)│
+                          │  (Next + TypeScript)│
                           └──────────┬──────────┘
                                      │
                     OpenAPI Codegen ◄─┤  Auto-generates typed clients
