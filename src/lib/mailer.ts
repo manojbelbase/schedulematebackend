@@ -35,7 +35,7 @@ export async function sendOtpEmail(to: string, otp: string, ttlMinutes: number):
 
     const html = `
     <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
-      <h2>ScheduleGPT Password Reset</h2>
+      <h2>ScheduleMate AI Password Reset</h2>
       <p>We received a request to reset the password for <strong>${escapeHtml(to)}</strong>.</p>
       <p>Your one-time verification code is:</p>
       <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; text-align: center; margin: 24px 0; padding: 16px; background: #f3f4f6; border-radius: 8px;">
@@ -48,7 +48,7 @@ export async function sendOtpEmail(to: string, otp: string, ttlMinutes: number):
     await t.sendMail({
         from: env.smtpFrom || env.smtpUser,
         to,
-        subject: "ScheduleGPT Password Reset Code",
+        subject: "ScheduleMate AI Password Reset Code",
         html,
     });
 }
@@ -72,7 +72,7 @@ export async function sendAccessRequestEmail(data: {
 
     const html = `
     <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px;">
-      <h2>ScheduleGPT Calendar Access Request</h2>
+      <h2>ScheduleMate AI Calendar Access Request</h2>
       <p><strong>${escapeHtml(name)}</strong> is requesting access to connect their Google Calendar.</p>
       <p>Their email address is:</p>
       <div style="font-size: 20px; font-weight: bold; margin: 16px 0; padding: 12px; background: #f3f4f6; border-radius: 8px;">
@@ -115,17 +115,17 @@ export async function sendAccessRequestStatusEmail(data: {
             "Your request to access the Google Calendar has been <strong>approved</strong>. " +
             "You can now connect your calendar from the sidebar. " +
             "If you still get an error when connecting, please reach out to our support team.";
-        subject = "ScheduleGPT: Google Calendar access approved";
+        subject = "ScheduleMate AI: Google Calendar access approved";
     } else {
         statusMessage =
             "Unfortunately, your request to access the Google Calendar was <strong>rejected</strong>. " +
             "If you believe this was a mistake, please reach out to our support team.";
-        subject = "ScheduleGPT: Google Calendar access request rejected";
+        subject = "ScheduleMate AI: Google Calendar access request rejected";
     }
 
     const html = `
     <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
-      <h2>ScheduleGPT Calendar Access</h2>
+      <h2>ScheduleMate AI Calendar Access</h2>
       ${name ? `<p>Hello, <strong>${escapeHtml(name)}</strong>.</p>` : ""}
       <p>${statusMessage}</p>
     </div>

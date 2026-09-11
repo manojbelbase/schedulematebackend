@@ -1,4 +1,4 @@
-# ScheduleGPT Backend
+# ScheduleMate AI Backend
 
 An **AI-powered calendar assistant** that lets users manage Google Calendar through natural language conversations. Built with **Express 5 + TypeORM + PostgreSQL + pgvector**, it features an LLM agent with tool-calling, long-term vector memory, and a multi-app frontend architecture.
 
@@ -27,7 +27,7 @@ An **AI-powered calendar assistant** that lets users manage Google Calendar thro
 
 ## What It Does
 
-ScheduleGPT is a full-stack AI scheduling assistant:
+ScheduleMate AI is a full-stack AI scheduling assistant:
 
 1. **Conversational AI** — Users chat naturally ("Schedule a meeting with John tomorrow at 3pm") and the AI agent understands intent, checks for conflicts, and manages calendar events via Google Calendar API.
 2. **Long-Term Memory** — The system remembers user preferences and past conversations using vector embeddings stored in PostgreSQL, so it learns over time.

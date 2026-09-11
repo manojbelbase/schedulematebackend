@@ -1,7 +1,7 @@
 {
   "name": "schedulegpt-backend",
   "version": "1.0.0",
-  "description": "ScheduleGPT API — Express 5 + TypeORM backend feeding schedulegptfrontend via OpenAPI codegen",
+  "description": "ScheduleMate AI API — Express 5 + TypeORM backend feeding schedulegptfrontend via OpenAPI codegen",
   "main": "dist/server.js",
   "type": "module",
   "scripts": {

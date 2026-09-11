@@ -20,10 +20,10 @@ import type { JsonObject } from "swagger-ui-express";
 export const swaggerConfig: JsonObject = {
     openapi: "3.0.0",
     info: {
-        title: "ScheduleGPT API",
+        title: "ScheduleMate AI API",
         version: "1.0.0",
         description:
-            "Express + TypeORM API for ScheduleGPT. This OpenAPI spec is consumed by `schedulegptfrontend` openapi-codegen to auto-generate typed clients for the web, backoffice and website apps.",
+            "Express + TypeORM API for ScheduleMate AI. This OpenAPI spec is consumed by `schedulegptfrontend` openapi-codegen to auto-generate typed clients for the web, backoffice and website apps.",
     },
     servers: [
         {

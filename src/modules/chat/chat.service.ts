@@ -122,7 +122,7 @@ export async function sendChatMessage(
             {
                 code: "USER_QUOTA_EXCEEDED",
                 upgradeInfo: {
-                    message: "Upgrade your plan to continue using ScheduleGPT.",
+                    message: "Upgrade your plan to continue using ScheduleMate AI.",
                 },
             }
         );
@@ -159,7 +159,7 @@ export async function sendChatMessage(
     await incrementRequestCount(userId);
 
     const assistantMessage = await addMessage({
-        conversationId,
+        conversationId, 
         role: "assistant",
         content: replyText,
     });

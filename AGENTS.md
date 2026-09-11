@@ -1,4 +1,4 @@
-# AGENTS.md — ScheduleGPT API Project Conventions
+# AGENTS.md — ScheduleMate AI API Project Conventions
 
 This file describes the architecture, folder structure, and coding conventions of this Express + TypeORM API. Follow these patterns when adding or modifying code.
 
