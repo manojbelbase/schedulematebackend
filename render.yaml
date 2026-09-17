@@ -18,11 +18,11 @@ services:
       - key: MEMORY_EXTRACTION_ENABLED
         value: "true"
       - key: CORS_ORIGINS
-        value: "http://localhost:3000,http://localhost:3001,http://localhost:3002"
+        value: "http://localhost:3000,https://schedulemateweb.vercel.app,https://schedulematebackoffice.vercel.app,https://schedulemateai.vercel.app"
       - key: DOCS_AUTH_TOKEN
         value: ""
       - key: FRONTEND_URL
-        value: "http://localhost:3000"
+        value: "https://schedulemateweb.vercel.app"
       - key: JWT_ACCESS_EXPIRES_IN
         value: "7d"
       - key: JWT_REFRESH_EXPIRES_IN
